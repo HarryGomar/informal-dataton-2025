@@ -7,20 +7,66 @@ interface ProductivityBySubsectorChartProps {
   view: "workers" | "value";
 }
 
+const chartFontFamily = "'Source Sans 3', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif";
+
 const baseOptions: ChartOptions<"bar"> = {
   responsive: true,
   maintainAspectRatio: false,
+  layout: {
+    padding: 12,
+  },
   plugins: {
     legend: {
       position: "bottom",
       labels: {
         usePointStyle: true,
+        font: {
+          family: chartFontFamily,
+          size: 13,
+        },
+        color: "#0f1c12",
       },
+    },
+    tooltip: {
+      backgroundColor: "rgba(18, 37, 26, 0.9)",
+      padding: 14,
+      titleFont: { family: "'Space Grotesk', 'Segoe UI', system-ui, sans-serif", size: 14 },
+      bodyFont: { family: chartFontFamily, size: 13 },
     },
   },
   scales: {
     y: {
       beginAtZero: true,
+      grid: {
+        color: "rgba(31, 44, 35, 0.08)",
+      },
+      ticks: {
+        color: "#0f1c12",
+        font: {
+          family: chartFontFamily,
+          size: 12,
+        },
+      },
+      border: {
+        display: false,
+      },
+    },
+    x: {
+      grid: {
+        display: false,
+      },
+      ticks: {
+        color: "#0f1c12",
+        font: {
+          family: chartFontFamily,
+          size: 12,
+        },
+        maxRotation: 0,
+        autoSkipPadding: 16,
+      },
+      border: {
+        display: false,
+      },
     },
   },
 };
@@ -44,7 +90,7 @@ export const ProductivityBySubsectorChart: React.FC<ProductivityBySubsectorChart
   };
 
   return (
-    <div style={{ height: "360px" }}>
+    <div className="productivity-chart">
       <Bar data={data} options={baseOptions} />
     </div>
   );

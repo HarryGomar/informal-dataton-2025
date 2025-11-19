@@ -14,6 +14,7 @@ interface ScrollSectionProps {
   eyebrow?: string;
   introContent?: React.ReactNode;
   onStepChange?: (stepId: string) => void;
+  className?: string;
 }
 
 export const ScrollSection: React.FC<ScrollSectionProps> = ({
@@ -26,6 +27,7 @@ export const ScrollSection: React.FC<ScrollSectionProps> = ({
   eyebrow,
   introContent,
   onStepChange,
+  className,
 }) => {
   const [activeStepId, setActiveStepId] = useState(() => steps[0]?.id ?? "");
   const [scrollOffset, setScrollOffset] = useState(0.5);
@@ -49,8 +51,10 @@ export const ScrollSection: React.FC<ScrollSectionProps> = ({
     onStepChange?.(data);
   };
 
+  const sectionClassName = ["section--scrolly", className].filter(Boolean).join(" ");
+
   return (
-    <Section id={id} tone={tone} layout={layout} className="section--scrolly">
+    <Section id={id} tone={tone} layout={layout} className={sectionClassName}>
       <div className="scroll-section__text">
         <header className="scroll-section__header">
           <p className="eyebrow">{eyebrow ?? "Sección"}</p>

@@ -196,35 +196,7 @@ export const ProposalSection: React.FC = () => {
       {/* Bloque C: Arquitectura Institucional */}
       <Section id="proposal-architecture" tone="plain">
         <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div>
-            <p className="eyebrow text-emerald-600">Implementación</p>
-            <h2 className="section-title mb-6">Arquitectura Institucional</h2>
-            <p className="mb-4 text-lg text-slate-700">
-              La implementación requiere colaboración, pero con una arquitectura sencilla.
-            </p>
-            <ul className="space-y-4 text-slate-600">
-              <li className="flex gap-3">
-                <span className="text-emerald-600 font-bold">1.</span>
-                <span><strong>Economía</strong> coordina y financia.</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-emerald-600 font-bold">2.</span>
-                <span><strong>ANTAD</strong> ofrece la plataforma comercial y logística.</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-emerald-600 font-bold">3.</span>
-                <span><strong>SAT/IMSS</strong> facilitan una transición gradual, no punitiva.</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-emerald-600 font-bold">4.</span>
-                <span><strong>INEGI</strong> identifica territorios objetivo y mide resultados.</span>
-              </li>
-              <li className="flex gap-3">
-                <span className="text-emerald-600 font-bold">5.</span>
-                <span><strong>Universidades y consultoras</strong> levantan diagnósticos y operan la capacitación en campo.</span>
-              </li>
-            </ul>
-          </div>
+          
           <div>
             <InstitutionalArchitectureDiagram />
           </div>
@@ -232,6 +204,35 @@ export const ProposalSection: React.FC = () => {
 
         {/* Ruta de Acción Timeline */}
         <div className="mt-20 max-w-3xl mx-auto">
+            <div>
+              <p className="eyebrow text-emerald-600">Implementación</p>
+              <h2 className="section-title mb-6">Arquitectura Institucional</h2>
+              <p className="mb-4 text-lg text-slate-700">
+                La implementación requiere colaboración, pero con una arquitectura sencilla.
+              </p>
+              <ul className="space-y-4 text-slate-600">
+                <li className="flex gap-3">
+                  <span className="text-emerald-600 font-bold">1.</span>
+                  <span><strong>Economía</strong> coordina y financia.</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-emerald-600 font-bold">2.</span>
+                  <span><strong>ANTAD</strong> ofrece la plataforma comercial y logística.</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-emerald-600 font-bold">3.</span>
+                  <span><strong>SAT/IMSS</strong> facilitan una transición gradual, no punitiva.</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-emerald-600 font-bold">4.</span>
+                  <span><strong>INEGI</strong> identifica territorios objetivo y mide resultados.</span>
+                </li>
+                <li className="flex gap-3">
+                  <span className="text-emerald-600 font-bold">5.</span>
+                  <span><strong>Universidades y consultoras</strong> levantan diagnósticos y operan la capacitación en campo.</span>
+                </li>
+              </ul>
+            </div>
             <h3 className="text-xl font-bold text-center mb-10">Ruta de Acción</h3>
             <div className="timeline">
               {[
@@ -265,6 +266,8 @@ export const ProposalSection: React.FC = () => {
             </div>
         </div>
       </Section>
+
+
     </>
   );
 };

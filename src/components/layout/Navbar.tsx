@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from "react";
-
-const navItems = [
-  { id: "intro", label: "Introducción" },
-  { id: "hero", label: "Hero" },
-  { id: "costos", label: "Costos" },
-  { id: "geografia", label: "Geografía" },
-  { id: "productividad", label: "Productividad" },
-  { id: "competencia", label: "Competencia" },
-  { id: "transition", label: "Transición" },
-];
+import React, { useEffect, useMemo, useState } from "react";
+import { sectionPhases } from "../../data/sectionsIndex";
 
 export const Navbar: React.FC = () => {
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const navItems = useMemo(
+    () =>
+      sectionPhases.map((phase) => ({
+        id: phase.anchor,
+        label: phase.navLabel,
+      })),
+    [],
+  );
 
   useEffect(() => {
     const { body } = document;
@@ -35,6 +35,18 @@ export const Navbar: React.FC = () => {
           Informalidad Comercio
         </a>
 
+        <nav id="site-nav" aria-label="Navegación principal" className={menuOpen ? "is-open" : ""}>
+          <ul className="navbar__menu">
+            {navItems.map((item) => (
+              <li key={item.id}>
+                <a href={`#${item.id}`} className="navbar__link" onClick={closeMenu}>
+                  {item.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
         <button
           type="button"
           className="navbar__toggle"
@@ -48,18 +60,6 @@ export const Navbar: React.FC = () => {
           <span aria-hidden className="navbar__toggle-line" />
         </button>
       </div>
-
-      <nav id="site-nav" aria-label="Navegación principal" className={menuOpen ? "is-open" : ""}>
-        <ul className="navbar__menu">
-          {navItems.map((item) => (
-            <li key={item.id}>
-              <a href={`#${item.id}`} className="navbar__link" onClick={closeMenu}>
-                {item.label}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </nav>
     </header>
   );
 };

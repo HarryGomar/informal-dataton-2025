@@ -28,7 +28,7 @@
   --stack-gap-md: clamp(1.25rem, 2.5vw, 2rem);
   --stack-gap-sm: clamp(0.75rem, 2vw, 1.25rem);
 
-  --navbar-height: 64px;
+  --navbar-height: 56px;
   --map-height-desktop: 520px;
   --map-height-tablet: 420px;
   --map-height-mobile: 320px;
@@ -37,7 +37,7 @@
 @media (max-width: 1024px) {
   :root {
     --page-padding-inline: clamp(1rem, 5vw, 3rem);
-    --navbar-height: 58px;
+  --navbar-height: 52px;
   }
 }
 
@@ -48,7 +48,7 @@
     --stack-gap-lg: clamp(1.25rem, 6vw, 2.5rem);
     --stack-gap-md: clamp(1rem, 5vw, 1.75rem);
     --stack-gap-sm: clamp(0.65rem, 4vw, 1.25rem);
-    --navbar-height: 54px;
+  --navbar-height: 48px;
   }
 }
 

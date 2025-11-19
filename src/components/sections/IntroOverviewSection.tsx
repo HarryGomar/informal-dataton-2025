@@ -1,8 +1,8 @@
 import React from "react";
 import { Section } from "../layout/Section";
 import { SectionHeader } from "../layout/SectionHeader";
-
-
+import { SectionIndex } from "../layout/SectionIndex";
+import { sectionPhases } from "../../data/sectionsIndex";
 
 const guidingQuestions = [
   "¿Cuál es el tamaño de la economía informal en el comercio?",
@@ -12,7 +12,7 @@ const guidingQuestions = [
 
 export const IntroOverviewSection: React.FC = () => {
   return (
-    <Section id="intro" tone="muted" layout="full">
+    <Section id="intro" tone="muted" layout="full" className="intro-overview">
       <SectionHeader
         alignment="center"
         eyebrow="Sección 0"
@@ -20,6 +20,7 @@ export const IntroOverviewSection: React.FC = () => {
         kicker="Durante casi dos décadas, la informalidad comercial se ha mantenido elevada. Esta narrativa la cuantifica y descompone desde ángulos fiscal, social y productivo."
       />
 
+      <div className="intro-grid">
         <div className="intro-grid__text">
           <p>
             La informalidad frena el crecimiento y limita el bienestar, pero no ha cedido pese a múltiples reformas.
@@ -35,17 +36,26 @@ export const IntroOverviewSection: React.FC = () => {
           <div className="intro-note">
             Encontrará scrollytelling, hojas de balance y tarjetas interactivas alineadas al lenguaje visual del deck de referencia.
           </div>
+          <div className="intro-questions-card intro-questions-card--inline">
+            <p className="eyebrow">Preguntas guía del Datatón</p>
+            <ul>
+              {guidingQuestions.map((question) => (
+                <li key={question}>{question}</li>
+              ))}
+            </ul>
+          </div>
         </div>
 
-      <div className="intro-questions-card">
-        <p className="eyebrow">Preguntas guía del Datatón</p>
-        <ul>
-          {guidingQuestions.map((question) => (
-            <li key={question}>{question}</li>
-          ))}
-        </ul>
+        <div className="intro-index">
+          <p className="intro-index__eyebrow">Mapa de lectura</p>
+          <h3>Índice navegable</h3>
+          <p>
+            Explora el recorrido completo por fases. Selecciona un bloque para filtrar las tarjetas y salta a la sección
+            correspondiente sin perder el hilo narrativo.
+          </p>
+          <SectionIndex phases={sectionPhases} />
+        </div>
       </div>
-
     </Section>
   );
 };

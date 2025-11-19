@@ -1,94 +1,147 @@
 import React from "react";
 import { Section } from "../layout/Section";
 
+const insightTakeaways = [
+  {
+    label: "Diagnóstico del pasado",
+    title: "Fiscalizar primero y acompañar después apenas movió la tasa de informalidad 3–4 puntos en 25 años.",
+    detail: "Sin productividad ni confianza, el incentivo dominante siguió siendo permanecer fuera del radar fiscal.",
+  },
+  {
+    label: "Qué muestran los datos",
+    title: "La informalidad comercial es exclusión productiva: micronegocios, mujeres cuidadoras y colonias con corrupción e inseguridad.",
+    detail: "Los mapas, perfiles y modelos predictivos evidencian infraestructura insuficiente y servicios públicos débiles, no falta de voluntad.",
+  },
+  {
+    label: "Hacia dónde vamos",
+    title: "Escalera Comercial hace rentable crecer primero y formalizar después.",
+    detail: "Cada peldaño entrega capacidades, integra a cadenas y suma beneficios antes de exigir obligaciones fiscales completas.",
+  },
+];
+
+const structuralFindings = [
+  {
+    title: "Productividad como punto de partida",
+    detail: "Los costos fiscales son asumibles sólo cuando existe escala, logística compartida y margen sano.",
+  },
+  {
+    title: "Territorios que determinan la política",
+    detail: "La informalidad florece donde la corrupción municipal, la inseguridad y la baja densidad bancaria expulsan a los comercios.",
+  },
+  {
+    title: "Personas en el centro",
+    detail: "Cuidadoras, Atrapados y Desalentados requieren acompañamientos distintos; un mismo programa perpetúa la brecha.",
+  },
+  {
+    title: "Secuencia gradual de obligaciones",
+    detail: "RFC simplificado → IMSS del dueño → primer trabajador formal → facturación regular; cada paso desbloquea nuevos beneficios.",
+  },
+];
+
+const principleHighlights = [
+  {
+    title: "Capacidad fiscal sostenible",
+    detail: "Recaudar ocurre cuando la utilidad neta por formalizarse es positiva y verificable.",
+  },
+  {
+    title: "Protección social alcanzable",
+    detail: "Los primeros registros en seguridad social se acompañan con subsidios temporales y soporte operativo.",
+  },
+  {
+    title: "Mercado interno resiliente",
+    detail: "La formalidad deja de ser un privilegio de grandes cadenas cuando el microcomercio comparte logística y compras.",
+  },
+];
+
+const actionSteps = [
+  "Cruzar Censos Económicos, ENOE y ENAPROCE para priorizar corredores comerciales donde Escalera tenga mayor retorno social.",
+  "Ejecutar un piloto evaluable con ANTAD: diagnóstico en tienda, módulos productivos y monitoreo de formalización por peldaño.",
+  "Modernizar la medición de informalidad en negocios dentro del hogar para ajustar incentivos y presupuestos en tiempo real.",
+];
+
 export const ConclusionSection: React.FC = () => {
   return (
-    <Section id="conclusion" tone="brand" className="text-white">
-      <div className="max-w-5xl mx-auto">
-        
-        {/* Bloque 1: Resumen Visual */}
-        <div className="mb-16">
-            <h2 className="text-3xl font-bold text-center mb-12 text-emerald-100">Lo que aprendimos sobre la informalidad comercial</h2>
-            <div className="grid md:grid-cols-3 gap-8">
-                
-                <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700 backdrop-blur-sm">
-                    <div className="text-4xl mb-4">📉</div>
-                    <h3 className="font-bold text-lg mb-2 text-emerald-200">Diagnóstico fallido del pasado</h3>
-                    <p className="text-sm text-slate-300">
-                        Tratar la informalidad como evasión voluntaria y enfocarse sólo en la recaudación movió la tasa apenas 3–4 puntos en 25 años.
-                    </p>
-                </div>
+    <Section id="conclusion" tone="brand" layout="full" className="text-white conclusion-section">
+      <div className="conclusion-shell">
+        <header className="conclusion__header">
+          <p className="eyebrow text-emerald-200">Conclusión</p>
+          <h2 className="section-title text-emerald-50 mb-6">Lo que aprendimos sobre la informalidad comercial</h2>
+          <p className="conclusion__lead">
+            La evidencia nos obligó a abandonar la narrativa de evasión deliberada. La informalidad comercial persiste porque el sistema no
+            ofrece productividad, logística ni certidumbre institucional. Esta es la síntesis del recorrido analítico.
+          </p>
+        </header>
 
-                <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700 backdrop-blur-sm">
-                    <div className="text-4xl mb-4">🔍</div>
-                    <h3 className="font-bold text-lg mb-2 text-emerald-200">Nuevo diagnóstico basado en datos</h3>
-                    <p className="text-sm text-slate-300">
-                        La informalidad comercial es exclusión y baja productividad: microempresas, mujeres cuidadoras y territorios con corrupción e inseguridad.
-                    </p>
-                </div>
+        <section className="insight-band">
+          {insightTakeaways.map((insight) => (
+            <article key={insight.label} className="insight-band__item">
+              <p className="insight-band__label">{insight.label}</p>
+              <h3>{insight.title}</h3>
+              <p>{insight.detail}</p>
+            </article>
+          ))}
+        </section>
 
-                <div className="bg-slate-800/50 p-6 rounded-lg border border-slate-700 backdrop-blur-sm">
-                    <div className="text-4xl mb-4">🪜</div>
-                    <h3 className="font-bold text-lg mb-2 text-emerald-200">Propuesta de solución</h3>
-                    <p className="text-sm text-slate-300">
-                        Escalera Comercial ofrece un camino de desarrollo productivo escalonado donde la formalidad es consecuencia del crecimiento.
-                    </p>
-                </div>
-
-            </div>
-        </div>
-
-        {/* Bloque 2: Conclusión Narrativa */}
-        <div className="max-w-3xl mx-auto text-center mb-16 space-y-6 text-lg text-slate-200 leading-relaxed">
+        <section className="finding-columns">
+          <div className="finding-columns__lead">
+            <p className="eyebrow text-emerald-200">Hallazgos accionables</p>
+            <h3>Cuatro certezas para diseñar política</h3>
             <p>
-                La informalidad en el comercio mexicano es compleja: nace en factores estructurales de educación, tamaño empresarial, género e instituciones débiles. No se resuelve con campañas punitivas ni simples condonaciones.
+              Estas conclusiones cruzan modelos, mapas y estudios de caso. Son los principios que guían la Escalera Comercial y cualquier
+              intervención pública que busque resultados medibles.
             </p>
+          </div>
+          <ul>
+            {structuralFindings.map((finding, index) => (
+              <li key={finding.title}>
+                <span>{String(index + 1).padStart(2, "0")}</span>
+                <div>
+                  <h4>{finding.title}</h4>
+                  <p>{finding.detail}</p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="principles-strip">
+          <div className="principles-strip__lead">
+            <p className="eyebrow text-emerald-200">Principios de política</p>
+            <h3>Qué debe garantizar la Escalera Comercial</h3>
+          </div>
+          <div className="principles-strip__items">
+            {principleHighlights.map((principle) => (
+              <article key={principle.title}>
+                <h4>{principle.title}</h4>
+                <p>{principle.detail}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="action-row">
+          <div>
+            <p className="eyebrow text-emerald-200">Próximos pasos</p>
+            <h3>Agenda inmediata</h3>
             <p>
-                Al entender sus causas con datos —costos fiscales, mapas territoriales, perfiles y modelos predictivos— emergen caminos viables. <strong className="text-white">Escalera Comercial</strong> ataca las raíces: productividad, confianza y acompañamiento.
+              INEGI, ANTAD y los equipos estatales pueden activar un piloto controlado en cuestión de meses. La premisa es sencilla: crecer
+              primero, formalizar después y medir cada peldaño.
             </p>
-            <p>
-                Formalizar no es un castigo ni un trámite: es el resultado natural de crecer y prosperar. Peldaño a peldaño podemos sacar a miles de comercios del círculo vicioso de la informalidad.
-            </p>
-            <div className="conclusion-benefits">
-              <div className="conclusion-benefits__item">
-                <strong className="block text-white">Menos evasión</strong>
-                <p>Rutas claras para recaudar de forma sostenible y progresiva.</p>
-              </div>
-              <div className="conclusion-benefits__item">
-                <strong className="block text-white">Más seguridad social</strong>
-                <p>Cobertura para dueños y trabajadores sin quebrar al negocio.</p>
-              </div>
-              <div className="conclusion-benefits__item">
-                <strong className="block text-white">Mercado interno sólido</strong>
-                <p>Mayor productividad y derrama económica en barrios y ciudades.</p>
-              </div>
-            </div>
-        </div>
+          </div>
+          <ol>
+            {actionSteps.map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+        </section>
 
-        {/* Bloque 3: Llamado a la Acción */}
-        <div className="text-center border-t border-slate-700 pt-12">
-            <h3 className="text-2xl font-bold text-white mb-6">Llamado a la Acción</h3>
-            <p className="max-w-2xl mx-auto text-slate-300 mb-8">
-                Invitamos a INEGI, ANTAD y a los tomadores de decisión a considerar este enfoque, con la misma seriedad con la que evaluamos programas sociales.
-            </p>
-            <ul className="conclusion-cta">
-              <li>Usar la inteligencia de datos disponible para identificar zonas y perfiles prioritarios.</li>
-              <li>Probar Escalera Comercial en un piloto evaluable (RCT) antes de escalar.</li>
-              <li>Fortalecer la medición de informalidad —especialmente negocios en el hogar— para perfeccionar las políticas futuras.</li>
-            </ul>
-            
-            
-            <button className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-8 rounded-full transition-colors shadow-lg mb-12">
-                Ver documentación técnica y código
-            </button>
-
-            <footer className="text-xs text-slate-500 mt-12">
-                <p>Proyecto desarrollado para el Datatón INEGI–ANTAD 2025.</p>
-                <p className="mt-1">Equipo: Rafael Harry Gomar Dawson · Eduardo Garcías · Mauricia Peña · Emilia Hernández · ITAM</p>
-              <p className="conclusion-footnote">Sólo si el piloto funciona, escalamos.</p>
-            </footer>
-        </div>
-
+        <footer className="conclusion__footer">
+          <div>
+            <p>Proyecto desarrollado para el Datatón INEGI–ANTAD 2025.</p>
+            <p>Equipo: Rafael Harry Gomar Dawson · Eduardo García · Mauricia Peña · Emilia Hernández · ITAM</p>
+          </div>
+          <p className="conclusion-footnote">Sólo si el piloto funciona, escalamos.</p>
+        </footer>
       </div>
     </Section>
   );

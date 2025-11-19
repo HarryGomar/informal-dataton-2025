@@ -5,7 +5,7 @@ const badges = ["Mapas interactivos", "Narrativa scroll", "Estimaciones fiscales
 
 const credits = [
   "Proyecto para el Datatón INEGI–ANTAD 2025",
-  "Equipo: Rafael Harry Gomar Dawson · Eduardo Garcías · Mauricia Peña · Emilia Hernández · ITAM",
+  "Equipo: Rafael Harry Gomar Dawson · Eduardo García · Mauricia Peña · Emilia Hernández · ITAM",
 ];
 
 export const HeroSection: React.FC = () => {

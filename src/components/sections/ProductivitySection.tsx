@@ -45,6 +45,19 @@ export const ProductivitySection: React.FC = () => (
     lead="Comparamos ocupación y valor agregado entre formales e informales para evidenciar la brecha de productividad."
     steps={steps}
     background="default"
-    renderGraphic={(activeStepId) => <ProductivityBySubsectorChart view={chartViewByStep[activeStepId]} />}
+    className="section--productivity"
+    renderGraphic={(activeStepId) => (
+      <div className="productivity-chart-panel">
+        <div className="productivity-chart-panel__meta">
+          <p className="productivity-chart-panel__eyebrow">Comparativo subsectorial</p>
+          <div className="productivity-chart-panel__view">
+            {chartViewByStep[activeStepId] === "workers"
+              ? "Distribución de empleo formal vs informal"
+              : "Valor agregado (mdp) por subsector"}
+          </div>
+        </div>
+        <ProductivityBySubsectorChart view={chartViewByStep[activeStepId]} />
+      </div>
+    )}
   />
 );
