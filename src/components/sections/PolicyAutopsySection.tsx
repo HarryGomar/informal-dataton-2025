@@ -1,175 +1,266 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Scrollama, Step } from "react-scrollama";
-import type { ScrollStepConfig } from "../../types/sections";
 import { Section } from "../layout/Section";
 import { InformalityTimelineChart } from "../charts/InformalityTimelineChart";
 import type { PolicyBandId } from "../charts/InformalityTimelineChart";
-import { InformalityChartFlip } from "../charts/InformalityChartFlip";
-import { totalVariation } from "../../data/policies";
+import { InformalityRealityPanel } from "../charts/InformalityRealityPanel";
 
-type PolicyStep = ScrollStepConfig & { timelineEndYear?: number };
+type StoryStat = { label: string; value: string; detail?: string };
 
-const steps: PolicyStep[] = [
+interface StoryStep {
+  id: string;
+  kicker?: string;
+  title: string;
+  summary: string;
+  bullets?: string[];
+  stats?: StoryStat[];
+  body?: React.ReactNode;
+  policyId?: PolicyBandId | null;
+  annotation?: string | null;
+  align?: "left" | "right";
+}
+
+const steps: StoryStep[] = [
   {
     id: "overview",
-    title: "25 años de políticas, casi sin cambio",
-    body:
-      "La trayectoria de la informalidad laboral total apenas cayó ~3–4 puntos porcentuales en 25 años. En 1998 más de la mitad de la fuerza laboral era informal y hoy sigue rondando 55%. La gráfica sirve como autopsia: veremos cómo REPECOS, SARE, RIF y RESICO apenas mueven la aguja.",
+    kicker: "4.1 · Autopsia",
+    title: "25 años de políticas casi sin movimiento",
+    summary:
+      "A pesar de cuatro generaciones de reformas, la tasa de informalidad bajó apenas ~4 puntos. Esta línea histórica muestra que los programas atacaron al evasor voluntario, no a los excluidos.",
+    bullets: [
+      "La serie 2000–2025 luce plana: el pico y el último dato siguen arriba de 54%",
+      "Cada política prometió un salto, pero la variación total fue de solo 3.97 p.p.",
+    ],
+    stats: [
+      { label: "Participación informal 1998", value: ">55%" },
+      { label: "Participación informal 2025", value: "≈54%" },
+    ],
+    annotation: "Variación total 2000–2025: apenas 3.97 puntos.",
+    align: "right",
   },
   {
     id: "repecos",
-    title: "1998 – Régimen de Pequeños Contribuyentes (REPECOS)",
-    body: (
-      <>
-        <p>
-          REPECOS simplificó el pago de impuestos para micronegocios, pero terminó creando un
-          "precipicio fiscal": más valía quedarse chico que crecer y enfrentar la carga formal.
-        </p>
-        <p>
-          Evaluaciones muestran tasas de evasión superiores a 96% entre 2000 y 2010; prácticamente
-          nadie pagaba lo que debía y se fomentó el enanismo fiscal.
-        </p>
-      </>
-    ),
+    kicker: "1998 – REPECOS",
+    title: "El precipicio fiscal que mantuvo a todos chicos",
+    summary:
+      "El régimen de pequeños contribuyentes simplificó el pago, pero creó un incentivo para quedarse artificialmente pequeño y no brincar al esquema general.",
+    bullets: [
+      "El SAT calculó evasión >96% entre 2000 y 2010",
+      "Se fomentó el enanismo fiscal: crecer significaba perder el beneficio",
+      "No hubo integración con seguridad social ni financiamiento formal",
+    ],
+    stats: [
+      { label: "Evasión estimada", value: ">96%", detail: "2000-2010" },
+      { label: "Diagnóstico", value: "Informal = evasor" },
+    ],
+    policyId: "repecos",
+    annotation: "La banda REPECOS domina 1998–2013 sin mover la línea.",
+    align: "right",
   },
   {
     id: "sare",
-    title: "2002 – Sistema de Apertura Rápida de Empresas (SARE)",
-    body: (
-      <>
-        <p>
-          SARE redujo trámites para abrir negocios formales (+5.6% de nuevas empresas en ciudades
-          donde operó), pero confundió costo de entrada con permanencia.
-        </p>
-        <p>
-          No logró convertir negocios informales existentes en formales ni mover la tasa global de
-          informalidad.
-        </p>
-      </>
-    ),
+    kicker: "2002 – SARE",
+    title: "Confundir costo de entrada con permanencia",
+    summary:
+      "SARE creó ventanillas únicas y trámites exprés. Funcionó para nuevas empresas formales, pero no tocó a quienes ya operaban en la informalidad.",
+    bullets: [
+      "+5.6% de nuevas empresas formales en ciudades con SARE",
+      "Impacto nulo sobre la tasa de informalidad laboral total",
+      "Facilitó abrir, no sobrevivir ni contratar con prestaciones",
+    ],
+    stats: [
+      { label: "Meta", value: "Reducir fricción" },
+      { label: "Resultado", value: "0 p.p. de cambio" },
+    ],
+    policyId: "sare",
+    annotation: "El spike administrativo aparece en 2002 sin alterar la curva.",
+    align: "right",
   },
   {
     id: "rif",
-    title: "2014 – Régimen de Incorporación Fiscal (RIF)",
-    body: (
-      <>
-        <p>
-          Sustituyó a REPECOS con incentivos como IMSS subsidiado y tasas graduales. Buscaba provocar
-          el "salto" a la formalidad ofreciendo beneficios temporales.
-        </p>
-        <p>
-          Resultado: el padrón formal casi no creció y la informalidad apenas cayó ~1 punto. El
-          Seguro Popular y la carga administrativa (CFDI) neutralizaron la oferta del RIF.
-        </p>
-      </>
-    ),
+    kicker: "2014 – RIF",
+    title: "Incentivos temporales frente a beneficios permanentes",
+    summary:
+      "El RIF ofreció tasas crecientes y acceso subsidiado al IMSS, pero compitió contra el Seguro Popular gratuito y sumó burocracia digital (CFDI).",
+    bullets: [
+      "El padrón formal casi no creció",
+      "La informalidad cayó solo ~1 p.p.",
+      "Requería facturar electrónicamente — una carga que muchos micronegocios no podían sostener",
+    ],
+    stats: [
+      { label: "Beneficio IMSS", value: "Temporal" },
+      { label: "Seguro Popular", value: "Gratuito", detail: "y sin trámites" },
+    ],
+    policyId: "rif",
+    annotation: "Tras 2014 apenas se percibe un diente en la línea.",
+    align: "left",
   },
   {
     id: "resico",
-    title: "2022 – Régimen Simplificado de Confianza (RESICO)",
-    body: (
-      <>
-        <p>
-          RESICO simplifica la vida de quienes ya son formales con tasas bajas sobre ingresos, pero
-          no es una política de formalización.
-        </p>
-        <p>
-          Opera como un régimen de economía de opción sin vínculo a la seguridad social, por lo que
-          casi no toca al universo completamente informal.
-        </p>
-      </>
-    ),
+    kicker: "2022 – RESICO",
+    title: "Un régimen de confianza solo para quienes ya confían",
+    summary:
+      "RESICO simplifica la tributación de contribuyentes cumplidos. Es una economía de opción: sirve a los formales que facturan, no a los excluidos del sistema.",
+    bullets: [
+      "Tasas bajas sobre ingresos declarados, sin vínculo al IMSS",
+      "No hay instrumentos para atraer a negocios completamente informales",
+      "Repite el sesgo hacia el 20% voluntario",
+    ],
+    stats: [
+      { label: "Público meta", value: "Formales activos" },
+      { label: "Impacto en la línea", value: "Invisible" },
+    ],
+    policyId: "resico",
+    annotation: "2022 añade otra banda verde sin inflexión visible.",
+    align: "left",
   },
   {
     id: "diagnosis",
-    title: "¿Por qué no funcionó? Un diagnóstico equivocado",
+    kicker: "Conclusión",
+    title: "El error fue tratar la exclusión como evasión",
+    summary:
+      "Las políticas asumieron que el problema era falta de voluntad para pagar. Pero la evidencia de Duval-Hernández separa preferencia y posibilidad: 80% son informales involuntarios.",
+    bullets: [
+      "Supuesto 1: los informales no saben cómo entrar (SARE)",
+      "Supuesto 2: no quieren pagar impuestos/cuotas (REPECOS/RIF/RESICO)",
+      "Realidad: la barrera es que no los contratan ni logran cruzar al mercado formal",
+    ],
     body: (
-      <>
-        <p>
-          Todas estas reformas partieron de dos supuestos erróneos: que los informales no sabían cómo
-          entrar a la formalidad (visión SARE) o que no querían pagar impuestos/cuotas (visión
-          REPECOS/RIF/RESICO).
-        </p>
-        <p>
-          La evidencia de Duval-Hernández sugiere lo contrario: ≈80% de los trabajadores informales
-          urbanos son involuntarios. Prefieren prestaciones y estabilidad, pero no pueden acceder por
-          exclusión estructural.
-        </p>
-        <p>
-          P(no ser formal) ≈ P(no querer ser formal) × P(no ser contratado formalmente). La mayoría
-          cae en el segundo factor: sí quiere, pero no es contratada. Diseñamos incentivos para el
-          20% equivocado.
-        </p>
-      </>
+      <p className="historic-card__math">
+        P(no ser formal) ≈ P(no querer ser formal) × P(no ser contratado formalmente)
+      </p>
     ),
+    annotation: "La autopsia concluye: el problema es exclusión, no evasión.",
+    align: "left",
   },
 ];
 
-const policyByStep: Record<string, PolicyBandId | null> = {
-  repecos: "repecos",
-  sare: "sare",
-  rif: "rif",
-  resico: "resico",
+const triggerOrder = steps.map((step) => step.id);
+
+const HistoricNarrativeCard: React.FC<{ step: StoryStep }> = ({ step }) => {
+  return (
+    <article key={step.id} className="historic-card" aria-live="polite">
+      {step.kicker && <p className="eyebrow">{step.kicker}</p>}
+      <h3>{step.title}</h3>
+      <p className="historic-card__summary">{step.summary}</p>
+      {step.bullets && (
+        <ul className="historic-card__bullets">
+          {step.bullets.map((bullet) => (
+            <li key={bullet}>{bullet}</li>
+          ))}
+        </ul>
+      )}
+      {step.body}
+      {step.stats && step.stats.length > 0 && (
+        <dl className="historic-card__stats">
+          {step.stats.map((stat) => (
+            <div key={stat.label}>
+              <dt>{stat.label}</dt>
+              <dd>
+                <strong>{stat.value}</strong>
+                {stat.detail && <span>{stat.detail}</span>}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      )}
+    </article>
+  );
 };
 
 export const PolicyAutopsySection: React.FC = () => {
-  const initialStepId = steps[0]?.id ?? "overview";
-  const [activeStepId, setActiveStepId] = useState<string>(initialStepId);
-  const isFlipView = activeStepId === "diagnosis";
-  const activePolicyId = policyByStep[activeStepId] ?? null;
-  const shouldShowBands = Boolean(activePolicyId);
-  const summaryVisible = activeStepId === "diagnosis";
+  const [activeStepId, setActiveStepId] = useState<string>(steps[0].id);
+  const [isMobileStack, setIsMobileStack] = useState<boolean>(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobileStack(window.innerWidth <= 900);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  const activeStep = useMemo(() => steps.find((step) => step.id === activeStepId) ?? steps[0], [activeStepId]);
+  const activePolicyId = activeStep.policyId ?? null;
+  const cardAlign = activeStep.align ?? "right";
+  const activeIndex = steps.findIndex((step) => step.id === activeStepId);
+
+  const goToStep = (index: number) => {
+    if (index < 0 || index >= steps.length) {
+      return;
+    }
+    setActiveStepId(steps[index].id);
+  };
 
   return (
     <Section id="diagnostico" layout="full" className="policy-autopsy" tone="plain">
-      <div className="policy-autopsy__header">
-        <p className="eyebrow">Sección 4</p>
-        <div>
-          <h2 className="section-title">Autopsia de políticas fallidas: un historial de intentos</h2>
-          <p className="section-lead">
-            La historia reciente está llena de programas para supuestamente reducir la informalidad comercial.
-            Sin embargo, la línea histórica permanece casi plana porque partimos de un diagnóstico equivocado.
-          </p>
-        </div>
+      <div className="policy-autopsy__intro">
+        <p className="eyebrow">Sección 4 · Historia</p>
+        <h2>Autopsia de 25 años de políticas contra la informalidad</h2>
+        <p>
+          Mantén el scroll: la línea se mantiene fija mientras las tarjetas cuentan por qué REPECOS, SARE, RIF y RESICO
+          no movieron la aguja. Al final, damos vuelta a la narrativa del 80% involuntario.
+        </p>
       </div>
 
       <div className="policy-autopsy__scroller">
-        <div className="policy-autopsy__timeline">
-          <div className="policy-autopsy__sticky">
-            {isFlipView ? (
-              <InformalityChartFlip />
+        <div className={`policy-autopsy__sticky-shell${isMobileStack ? " is-mobile" : ""}`} aria-live="polite">
+          <div className="policy-autopsy__stage">
+            <InformalityTimelineChart
+              variant="full"
+              activePolicyId={activePolicyId}
+              showBands
+              annotation={activeStep.annotation ?? null}
+            />
+            {isMobileStack ? (
+              <div className="policy-autopsy__mobile-carousel">
+                <button
+                  type="button"
+                  className="policy-autopsy__carousel-nav"
+                  onClick={() => goToStep(activeIndex - 1)}
+                  disabled={activeIndex <= 0}
+                  aria-label="Tarjeta anterior"
+                >
+                  ‹
+                </button>
+                <div className="policy-autopsy__mobile-card is-active">
+                  <HistoricNarrativeCard step={activeStep} />
+                </div>
+                <button
+                  type="button"
+                  className="policy-autopsy__carousel-nav"
+                  onClick={() => goToStep(activeIndex + 1)}
+                  disabled={activeIndex >= steps.length - 1}
+                  aria-label="Siguiente tarjeta"
+                >
+                  ›
+                </button>
+              </div>
             ) : (
-              <InformalityTimelineChart variant="full" activePolicyId={activePolicyId} showBands={shouldShowBands} />
+              <div className={`policy-autopsy__card-layer policy-autopsy__card-layer--${cardAlign}`} key={activeStep.id}>
+                <HistoricNarrativeCard step={activeStep} />
+              </div>
             )}
           </div>
         </div>
 
-        <div className="policy-autopsy__steps">
-          <Scrollama offset={0.65} onStepEnter={({ data }) => setActiveStepId(data)}>
-            {steps.map((step) => (
-              <Step data={step.id} key={step.id}>
-                <article className={`scroll-step${activeStepId === step.id ? " scroll-step--active" : ""}`}>
-                  {step.eyebrow && <p className="eyebrow">{step.eyebrow}</p>}
-                  <h3>{step.title}</h3>
-                  <div className="scroll-step__body">
-                    {typeof step.body === "string" ? <p>{step.body}</p> : step.body}
+        {!isMobileStack && (
+          <div className="policy-autopsy__steps" aria-hidden="true">
+            <Scrollama offset={0.6} onStepEnter={({ data }) => setActiveStepId(data)}>
+              {triggerOrder.map((id) => (
+                <Step data={id} key={id}>
+                  <div className="policy-autopsy__trigger">
+                    <span>{steps.find((step) => step.id === id)?.title}</span>
                   </div>
-                  {step.footnote && <small className="scroll-step__footnote">{step.footnote}</small>}
-                </article>
-              </Step>
-            ))}
-          </Scrollama>
-        </div>
+                </Step>
+              ))}
+            </Scrollama>
+          </div>
+        )}
       </div>
 
-      <div className={`policy-autopsy__summary${summaryVisible ? " is-visible" : ""}`} aria-hidden={!summaryVisible}>
-        <p className="eyebrow">Conclusión</p>
-        <h3>Variación total 2000–2024: {totalVariation.toFixed(2)} p.p.</h3>
-        <p>
-          A pesar de cada programa, la curva permanece plana. El problema no es falta de incentivos para el evasor voluntario,
-          sino barreras estructurales que impiden a cuatro de cada cinco trabajadores acceder a un empleo formal.
-        </p>
-      </div>
+      <InformalityRealityPanel />
     </Section>
   );
 };

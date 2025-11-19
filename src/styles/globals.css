@@ -20,8 +20,42 @@
   --font-family-heading: 'Space Grotesk', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-family-body: 'Source Sans 3', 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --line-height-default: 1.7;
-  --max-width-content: 1240px;
-  --page-padding-inline: clamp(1.5rem, 5vw, 4.5rem);
+
+  --page-max-width: 1240px;
+  --page-padding-inline: clamp(1.5rem, 4vw, 4.5rem);
+  --section-gap: clamp(2.5rem, 5vw, 4rem);
+  --stack-gap-lg: clamp(2rem, 4vw, 3rem);
+  --stack-gap-md: clamp(1.25rem, 2.5vw, 2rem);
+  --stack-gap-sm: clamp(0.75rem, 2vw, 1.25rem);
+
+  --navbar-height: 64px;
+  --map-height-desktop: 520px;
+  --map-height-tablet: 420px;
+  --map-height-mobile: 320px;
+}
+
+@media (max-width: 1024px) {
+  :root {
+    --page-padding-inline: clamp(1rem, 5vw, 3rem);
+    --navbar-height: 58px;
+  }
+}
+
+@media (max-width: 640px) {
+  :root {
+    --page-padding-inline: clamp(0.9rem, 6vw, 2rem);
+    --section-gap: clamp(1.75rem, 7vw, 3rem);
+    --stack-gap-lg: clamp(1.25rem, 6vw, 2.5rem);
+    --stack-gap-md: clamp(1rem, 5vw, 1.75rem);
+    --stack-gap-sm: clamp(0.65rem, 4vw, 1.25rem);
+    --navbar-height: 54px;
+  }
+}
+
+@supports (height: 100dvh) {
+  :root {
+    --viewport-height: 100dvh;
+  }
 }
 
 * {
@@ -43,8 +77,13 @@ body,
 }
 
 body {
-  font-size: 1rem;
+  font-size: clamp(0.95rem, 0.35vw + 0.8rem, 1.05rem);
   letter-spacing: -0.001em;
+  background-color: var(--color-background);
+}
+
+body.body-lock {
+  overflow: hidden;
 }
 
 img {

@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import type { CSSProperties } from "react";
+import { Section } from "../layout/Section";
 import { ScrollSection } from "../layout/ScrollSection";
 import { profiles } from "../../data/profiles";
 import type { Profile } from "../../data/profiles";
@@ -15,6 +17,7 @@ import {
 import type { ProfileMetricType } from "../maps/mapLayerConfig";
 import type { ProfileLayerId } from "../../types/geography";
 import { PROFILE_LAYER_LABELS } from "../../types/geography";
+import type { ScrollStepConfig } from "../../types/sections";
 
 const PROFILE_ID_ORDER: ProfileLayerId[] = ["microtrap", "desalentados", "cuidadoras"];
 const PROFILE_STEP_MAP: Record<string, ProfileLayerId> = {
@@ -22,98 +25,28 @@ const PROFILE_STEP_MAP: Record<string, ProfileLayerId> = {
   desalentados: "desalentados",
   cuidadoras: "cuidadoras",
 };
-const INTERACTIVE_STEPS = new Set(["explore", "conclusion"]);
+const INTERACTIVE_STEPS = new Set(["explore", "policy"]);
 
-
-// --- Sub-components ---
-
-const ProfileCard: React.FC<{ profile: Profile; isActive: boolean; onClick: () => void }> = ({
-  profile,
-  isActive,
-  onClick,
-}) => {
-  const Icon =
-    profile.icon === "care"
-      ? IconCareWork
-      : profile.icon === "micro"
-      ? IconMicroenterprise
-      : IconInstitution;
-
-  return (
-    <div
-      onClick={onClick}
-      className={`cursor-pointer p-4 rounded-lg border transition-all duration-300 ${
-        isActive
-          ? "bg-emerald-50 border-emerald-500 shadow-md transform scale-105"
-          : "bg-white border-slate-200 hover:border-emerald-300 hover:shadow-sm"
-      }`}
-    >
-      <div className={`mb-3 ${isActive ? "text-emerald-600" : "text-slate-400"}`}>
-        <Icon />
-      </div>
-      <h4 className="font-bold text-slate-800 mb-2">{profile.title}</h4>
-      <ul className="text-sm text-slate-600 space-y-1 list-disc list-inside">
-        {profile.shortDescription.slice(0, 2).map((desc, i) => (
-          <li key={i}>{desc}</li>
-        ))}
-      </ul>
-    </div>
-  );
+const PROFILE_COORDINATES: Record<ProfileLayerId, { x: number; y: number }> = {
+  microtrap: { x: 50, y: 18 },
+  desalentados: { x: 78, y: 80 },
+  cuidadoras: { x: 22, y: 80 },
 };
 
-const ProfileDetail: React.FC<{ profile: Profile }> = ({ profile }) => {
-  return (
-    <div className="mt-6 p-6 bg-emerald-50 rounded-lg border border-emerald-100">
-      <h4 className="text-lg font-bold text-emerald-800 mb-3">{profile.title}</h4>
-      <p className="text-slate-700 mb-4">{profile.fullDescription}</p>
-      
-      <h5 className="font-semibold text-emerald-700 mb-2 text-sm uppercase tracking-wide">Necesidades Clave</h5>
-      <ul className="space-y-2">
-        {profile.needs.map((need, i) => (
-          <li key={i} className="flex items-start text-sm text-slate-700">
-            <span className="mr-2 text-emerald-500">→</span>
-            {need}
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
+type TriangleNodeStyle = CSSProperties & {
+  "--triangle-x"?: string;
+  "--triangle-y"?: string;
 };
 
-const VarianceExplained: React.FC = () => (
-  <div className="p-6 bg-white rounded-lg shadow-sm border border-slate-200 text-center">
-    <div className="relative w-32 h-32 mx-auto mb-4">
-      <svg className="w-full h-full transform -rotate-90">
-        <circle
-          cx="64"
-          cy="64"
-          r="56"
-          fill="none"
-          stroke="#e2e8f0"
-          strokeWidth="12"
-        />
-        <circle
-          cx="64"
-          cy="64"
-          r="56"
-          fill="none"
-          stroke="#10b981"
-          strokeWidth="12"
-          strokeDasharray="351.86"
-          strokeDashoffset={351.86 * (1 - 0.83)}
-          className="transition-all duration-1000 ease-out"
-        />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center flex-col">
-        <span className="text-3xl font-bold text-emerald-600">83%</span>
-      </div>
-    </div>
-    <p className="text-slate-600 font-medium">Varianza explicada por perfiles</p>
-    <p className="text-xs text-slate-400 mt-1">
-      Solo con estos indicadores logramos explicar la mayor parte de la informalidad.
-    </p>
-  </div>
-);
+type TriangleTooltipStyle = CSSProperties & {
+  "--tooltip-x"?: string;
+  "--tooltip-y"?: string;
+};
+
+const profileDictionary = profiles.reduce<Record<ProfileLayerId, Profile>>((acc, profile) => {
+  acc[profile.id] = profile;
+  return acc;
+}, {} as Record<ProfileLayerId, Profile>);
 
 interface ProfileMapControlsProps {
   profile: ProfileLayerId;
@@ -158,177 +91,265 @@ const ProfileMapControls: React.FC<ProfileMapControlsProps> = ({
   </form>
 );
 
-// --- Main Section Component ---
+interface TriangleNodeProps {
+  profile: Profile;
+  order: number;
+  position: "top" | "left" | "right";
+  isActive: boolean;
+  onSelect: (profileId: ProfileLayerId) => void;
+  onFocusProfile: (profileId: ProfileLayerId | null) => void;
+  coordinates: { x: number; y: number };
+}
+
+const TriangleNode: React.FC<TriangleNodeProps> = ({
+  profile,
+  order,
+  position,
+  isActive,
+  onSelect,
+  onFocusProfile,
+  coordinates,
+}) => {
+  const Icon =
+    profile.icon === "care"
+      ? IconCareWork
+      : profile.icon === "micro"
+      ? IconMicroenterprise
+      : IconInstitution;
+
+  const nodeStyle: TriangleNodeStyle = {
+    "--triangle-x": `${coordinates.x}%`,
+    "--triangle-y": `${coordinates.y}%`,
+  };
+
+  return (
+    <button
+      type="button"
+      aria-label={`Perfil ${order}: ${profile.title}`}
+      className={`profiles-triangle__node profiles-triangle__node--${position} ${
+        isActive ? "is-active" : ""
+      }`}
+      style={nodeStyle}
+      onClick={() => onSelect(profile.id)}
+      onMouseEnter={() => onFocusProfile(profile.id)}
+      onMouseLeave={() => onFocusProfile(null)}
+      onFocus={() => onFocusProfile(profile.id)}
+      onBlur={() => onFocusProfile(null)}
+    >
+      <span className="profiles-triangle__badge">{order}</span>
+      <div className="profiles-triangle__glyph" aria-hidden="true">
+        <Icon />
+      </div>
+    </button>
+  );
+};
+
+interface TriangleCopyProps {
+  profile: Profile;
+  order: number;
+  position: "top" | "right" | "left";
+  isActive: boolean;
+  onSelect: (profileId: ProfileLayerId) => void;
+  onFocusProfile: (profileId: ProfileLayerId | null) => void;
+}
+
+const TriangleCopy: React.FC<TriangleCopyProps> = ({
+  profile,
+  order,
+  position,
+  isActive,
+  onSelect,
+  onFocusProfile,
+}) => (
+  <article
+    className={`profiles-triangle__copy profiles-triangle__copy--${position} ${isActive ? "is-active" : ""}`}
+  >
+    <button
+      type="button"
+      className="profiles-triangle__copy-trigger"
+      aria-pressed={isActive}
+      onClick={() => onSelect(profile.id)}
+      onMouseEnter={() => onFocusProfile(profile.id)}
+      onMouseLeave={() => onFocusProfile(null)}
+      onFocus={() => onFocusProfile(profile.id)}
+      onBlur={() => onFocusProfile(null)}
+    >
+      <span className="profiles-triangle__copy-eyebrow">Perfil {order}</span>
+      <h3>{profile.title}</h3>
+    </button>
+    <p>{profile.triangleHook}</p>
+  </article>
+);
+
+const PROFILE_POSITION_CLASS: Record<ProfileLayerId, "top" | "right" | "left"> = {
+  microtrap: "top",
+  desalentados: "right",
+  cuidadoras: "left",
+};
+
+const TOOLTIP_OFFSETS: Record<"top" | "right" | "left", { x: number; y: number }> = {
+  top: { x: 0, y: -14 },
+  right: { x: 10, y: -6 },
+  left: { x: -10, y: -6 },
+};
+
+const TriangleTooltip: React.FC<{
+  profile: Profile;
+  position: "top" | "right" | "left";
+  coordinates: { x: number; y: number };
+}> = ({ profile, position, coordinates }) => {
+  const offset = TOOLTIP_OFFSETS[position];
+  const tooltipStyle: TriangleTooltipStyle = {
+    "--tooltip-x": `${coordinates.x + offset.x}%`,
+    "--tooltip-y": `${coordinates.y + offset.y}%`,
+  };
+
+  return (
+    <div
+      className={`profiles-triangle__tooltip profiles-triangle__tooltip--${position}`}
+      style={tooltipStyle}
+    >
+    <p className="profiles-triangle__tooltip-eyebrow">{PROFILE_LAYER_LABELS[profile.id]}</p>
+    <h5>{profile.headline}</h5>
+    <p>{profile.fullDescription}</p>
+    <ul>
+      {profile.needs.map((need) => (
+        <li key={need}>{need}</li>
+      ))}
+    </ul>
+    </div>
+  );
+};
+
+interface DisclosureProps {
+  summary: string;
+  questions: string[];
+  dataPoints: string[];
+}
+
+const DetailsDisclosure: React.FC<DisclosureProps> = ({ summary, questions, dataPoints }) => (
+  <details className="profiles-disclosure">
+    <summary>{summary}</summary>
+    <div className="profiles-disclosure__body">
+      <div>
+        <p className="profiles-disclosure__label">Preguntas que guiaron esta vista</p>
+        <ul>
+          {questions.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </div>
+      <div>
+        <p className="profiles-disclosure__label">Datos y columnas utilizadas</p>
+        <ul>
+          {dataPoints.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  </details>
+);
+
+const buildProfileStep = (profile: Profile, order: number): ScrollStepConfig => ({
+  id: profile.id,
+  eyebrow: `Perfil ${order}`,
+  title: profile.title,
+  body: (
+    <div className="profiles-step-body">
+      <p>{profile.fullDescription}</p>
+      <ul className="profiles-step-list">
+        {profile.needs.map((need) => (
+          <li key={need}>{need}</li>
+        ))}
+      </ul>
+      <DetailsDisclosure
+        summary="Preguntas & datos"
+        questions={[
+          "¿En qué municipios domina este perfil?",
+          "¿Qué barrera específica lo mantiene informal?",
+        ]}
+        dataPoints={[`Máscara: ${profile.logic.mask.join(" · ")}`, ...profile.logic.dataSignals]}
+      />
+    </div>
+  ),
+});
 
 export const ProfilesSection: React.FC = () => {
-  const [activeProfileId, setActiveProfileId] = useState<ProfileLayerId | null>(null);
-  const [profileFilter, setProfileFilter] = useState<ProfileLayerId>(PROFILE_ID_ORDER[0]);
+  const [selectedProfileId, setSelectedProfileId] = useState<ProfileLayerId>(PROFILE_ID_ORDER[0]);
+  const [hoveredProfileId, setHoveredProfileId] = useState<ProfileLayerId | null>(null);
   const [metricFilter, setMetricFilter] = useState<ProfileMetricType>("share_pct");
 
+  const steps: ScrollStepConfig[] = useMemo(
+    () => {
+      const introStep: ScrollStepConfig = {
+        id: "overview",
+        title: "83% de la variación, explicado sin ruido",
+        body: (
+          <div className="profiles-step-body">
+            <p>
+              Tres máscaras bastan para capturar el 83 % de la varianza municipal de la informalidad en comercio. No son personajes inventados, sino concentrados de variables de educación, tamaño de negocio, entorno delictivo y cuidados.
+            </p>
+            <DetailsDisclosure
+              summary="Ver metodología"
+              questions={[
+                "¿Cómo se llegó al 83 %?",
+                "¿Qué fuentes alimentan `profiles_mun.parquet`?",
+              ]}
+              dataPoints={[
+                "Modelo lineal regularizado (R² municipal 0.83)",
+                "Microdatos ENOE/ENCIG 2022",
+                "Agregación por municipio/ZM",
+              ]}
+            />
+          </div>
+        ),
+      };
 
-  const steps = [
-    {
-      id: "intro",
-      title: "Perfiles de la informalidad: humanizando los datos",
-      body: (
-        <>
-          <p>
-            Con los resultados del modelo, dimos un paso adicional: definir perfiles arquetípicos de informales en el comercio. La idea es humanizar el fenómeno y reconocer que no todos los informales son iguales.
-          </p>
-          <p className="mt-4">
-            Basados en combinaciones de variables de educación, tamaño de negocio, entorno institucional y género/cuidados, identificamos <strong>tres perfiles clave</strong>.
-          </p>
-          <p className="mt-4">
-            Al estimar cuántos informales de comercio caen en cada perfil en cada municipio, mostramos que <strong>solo con estos indicadores logramos explicar ~83% de la variación</strong> de la informalidad en comercio.
-          </p>
-        </>
-      ),
-    },
-    {
-      id: "carousel",
-      title: "Tres perfiles clave",
-      body: (
-        <div className="space-y-4">
-          <p>
-            Estos perfiles resumen en personajes-tipo lo que de otra forma serían más de 20 variables sueltas. Haz clic en las tarjetas para explorar cada uno.
-          </p>
-          <div className="grid grid-cols-1 gap-4">
-            {profiles.map((profile) => (
-              <ProfileCard
-                key={profile.id}
-                profile={profile}
-                isActive={activeProfileId === profile.id}
-                onClick={() => {
-                  setActiveProfileId(profile.id);
-                  setProfileFilter(profile.id);
-                }}
-              />
-            ))}
+      const profileSteps = PROFILE_ID_ORDER.map((id, index) => buildProfileStep(profileDictionary[id], index + 1));
+
+      const exploreStep: ScrollStepConfig = {
+        id: "explore",
+        title: "Explora el mapa",
+        body: (
+          <div className="profiles-step-body">
+            <p>
+              Usa los selectores para alternar el perfil activo y la métrica (participación, ranking o conteo). Observa cómo cambia la geografía y detecta hotspots que requieran intervención.
+            </p>
+            <DetailsDisclosure
+              summary="Preguntas & datos"
+              questions={["¿Qué municipios concentran el perfil?", "¿Cómo varía el share vs. el conteo?"]}
+              dataPoints={["`profile_*_share`", "`profile_*_count`", "`informal_com_occ`"]}
+            />
           </div>
-          {activeProfileId && (
-            <ProfileDetail profile={profiles.find((p) => p.id === activeProfileId)!} />
-          )}
-        </div>
-      ),
-    },
-    {
-      id: "microtrap",
-      title: "Comerciantes atrapados en lo micro",
-      eyebrow: "Perfil 1",
-      body: (
-        <>
-          <p>
-            Cuando seleccionamos el perfil “Comerciantes atrapados en lo micro”, el mapa muestra dónde se concentran los micro-negocios informales estancados.
-          </p>
-          <p className="mt-4">
-            Observamos que se extienden por todo el país, pero con <strong>mayor densidad en estados del sur y centro</strong> donde predominan microempresas de baja productividad.
-          </p>
-          <div className="mt-6 p-4 bg-slate-50 rounded border border-slate-200">
-            <h5 className="font-bold text-sm text-slate-700 mb-2">Top Municipios (Concentración)</h5>
-            <ul className="text-sm text-slate-600 space-y-1">
-              <li>1. Ocosingo, Chiapas</li>
-              <li>2. San Felipe del Progreso, México</li>
-              <li>3. Chilón, Chiapas</li>
-              <li>4. Huejutla de Reyes, Hidalgo</li>
-            </ul>
+        ),
+      };
+
+      const policyStep: ScrollStepConfig = {
+        id: "policy",
+        title: "De perfiles a políticas",
+        body: (
+          <div className="profiles-step-body">
+            <p>
+              Con los perfiles identificados podemos diseñar rutas diferenciadas: cuidados y flexibilidad para Cuidadoras, productividad y crédito para Atrapados, seguridad y simplificación para Desalentados.
+            </p>
+            <DetailsDisclosure
+              summary="Checklist de decisión"
+              questions={["¿Qué incentivos priorizar por municipio?", "¿Qué indicador gatilla una intervención?"]}
+              dataPoints={["`profile_*_share` > 40% → acción inmediata", "Cruzar con tasas de delitos, brecha de cuidados"]}
+            />
           </div>
-        </>
-      ),
+        ),
+      };
+
+      return [introStep, ...profileSteps, exploreStep, policyStep];
     },
-    {
-      id: "desalentados",
-      title: "Emprendedores desalentados",
-      eyebrow: "Perfil 2",
-      body: (
-        <>
-          <p>
-            Al activar el perfil “Emprendedores desalentados”, el mapa resalta zonas donde la informalidad está ligada a inseguridad y corrupción.
-          </p>
-          <p className="mt-4">
-            Se concentran en municipios con alta incidencia delictiva y altos índices de extorsión reportada, tanto en grandes zonas urbanas como en corredores comerciales específicos del sur.
-          </p>
-          <div className="mt-6 p-4 bg-slate-50 rounded border border-slate-200">
-            <h5 className="font-bold text-sm text-slate-700 mb-2">Top Municipios (Riesgo Institucional)</h5>
-            <ul className="text-sm text-slate-600 space-y-1">
-              <li>1. Ecatepec de Morelos, México</li>
-              <li>2. Chilpancingo de los Bravo, Guerrero</li>
-              <li>3. Coatzacoalcos, Veracruz</li>
-              <li>4. Uruapan, Michoacán</li>
-            </ul>
-          </div>
-        </>
-      ),
-    },
-    {
-      id: "cuidadoras",
-      title: "Cuidadoras invisibles",
-      eyebrow: "Perfil 3",
-      body: (
-        <>
-          <p>
-            Al enfocarnos en las “Cuidadoras invisibles”, vemos un patrón distinto. Este perfil tiende a concentrarse en <strong>zonas urbanas populares y periferias metropolitanas</strong>.
-          </p>
-          <p className="mt-4">
-            En varios estados del sur –como Chiapas, Oaxaca o Veracruz– la proporción de cuidadoras entre los informales de comercio es especialmente alta.
-          </p>
-          <div className="mt-6 p-4 bg-slate-50 rounded border border-slate-200">
-            <h5 className="font-bold text-sm text-slate-700 mb-2">Top Municipios (Cuidados)</h5>
-            <ul className="text-sm text-slate-600 space-y-1">
-              <li>1. Nezahualcóyotl, México</li>
-              <li>2. Iztapalapa, México</li>
-              <li>3. Centro, Tabasco</li>
-              <li>4. Tuxtla Gutiérrez, Chiapas</li>
-            </ul>
-          </div>
-        </>
-      ),
-    },
-    {
-      id: "explore",
-      title: "Explora y filtra el mapa",
-      body: (
-        <>
-          <p>
-            Tras revisar los perfiles, usa el panel de filtros en el mapa para alternar entre perfiles y métricas.
-          </p>
-          <p className="mt-4">
-            Puedes ver el porcentaje, el ranking o el número estimado de personas por perfil. Elige tu combinación y observa cómo cambia el patrón territorial.
-          </p>
-        </>
-      ),
-    },
-    {
-      id: "conclusion",
-      title: "De perfiles a políticas",
-      body: (
-        <>
-          <p>
-            En síntesis, estos tres perfiles capturan gran parte de la diversidad de la informalidad comercial en México.
-          </p>
-          <p className="mt-4">
-            Para los <em>policymakers</em>, esto significa que podemos pasar de diagnósticos abstractos a <strong>intervenciones concretas</strong>:
-          </p>
-          <ul className="list-disc list-inside mt-2 space-y-2 ml-2">
-            <li>Guarderías y esquemas flexibles para <strong>Cuidadoras</strong>.</li>
-            <li>Productividad y financiamiento para <strong>Atrapados</strong>.</li>
-            <li>Seguridad y simplificación para <strong>Desalentados</strong>.</li>
-          </ul>
-        </>
-      ),
-    },
-  ];
+    [],
+  );
 
   const renderGraphic = (stepId: string) => {
-    if (stepId === "intro") {
-      return (
-        <div className="flex items-center justify-center h-full">
-          <VarianceExplained />
-        </div>
-      );
-    }
-
     const forcedProfile = PROFILE_STEP_MAP[stepId];
-    const profileForMap = forcedProfile ?? (activeProfileId ?? profileFilter);
+    const profileForMap = forcedProfile ?? selectedProfileId;
     const metricForMap: ProfileMetricType = forcedProfile ? "share_pct" : metricFilter;
     const showControls = INTERACTIVE_STEPS.has(stepId);
     const layerConfig = getProfileLayerConfig(profileForMap, metricForMap);
@@ -340,11 +361,11 @@ export const ProfilesSection: React.FC = () => {
           controlsSlot={
             showControls ? (
               <ProfileMapControls
-                profile={profileFilter}
+                profile={selectedProfileId}
                 metric={metricFilter}
-                onProfileChange={(value: ProfileLayerId) => {
-                  setProfileFilter(value);
-                  setActiveProfileId(value);
+                onProfileChange={(value) => {
+                  setSelectedProfileId(value);
+                  setHoveredProfileId(null);
                 }}
                 onMetricChange={setMetricFilter}
               />
@@ -355,14 +376,92 @@ export const ProfilesSection: React.FC = () => {
     );
   };
 
+  const handleStepChange = (stepId: string) => {
+    const forcedProfile = PROFILE_STEP_MAP[stepId];
+    if (forcedProfile && forcedProfile !== selectedProfileId) {
+      setSelectedProfileId(forcedProfile);
+      setHoveredProfileId(null);
+    }
+  };
+
   return (
-    <ScrollSection
-      id="profiles"
-      title="Perfiles de la Informalidad"
-      eyebrow="Sección 7"
-      lead="Humanizando los datos"
-      steps={steps}
-      renderGraphic={renderGraphic}
-    />
+    <>
+      <Section id="profiles" tone="plain" layout="full" className="profiles-section">
+        <div className="profiles-band profiles-hero" data-band="hero">
+          <div className="profiles-hero__text">
+            <p className="eyebrow">Sección 7</p>
+            <h2>Perfiles de informalidad: datos que se convierten en historia humana</h2>
+            <p>
+              Destilamos más de 20 variables en solo tres arquetipos. Cada uno sintetiza causas y necesidades específicas para intervenir sin disparar a ciegas.
+            </p>
+          </div>
+          <div className="profiles-hero__meta">
+            <p className="eyebrow">Pipeline</p>
+            <ul>
+              <li>Microdatos ENOE / ENCIG 2022</li>
+              <li>Máscaras lógicas → `profiles_mun.parquet`</li>
+              <li>Visualización sincronizada (triángulo + mapa)</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="profiles-band" data-band="triangle">
+          <div className="profiles-triangle">
+            {PROFILE_ID_ORDER.map((profileId, index) => (
+              <TriangleCopy
+                key={`copy-${profileId}`}
+                profile={profileDictionary[profileId]}
+                order={index + 1}
+                position={PROFILE_POSITION_CLASS[profileId]}
+                isActive={selectedProfileId === profileId}
+                onSelect={(id) => {
+                  setSelectedProfileId(id);
+                  setHoveredProfileId(null);
+                }}
+                onFocusProfile={setHoveredProfileId}
+              />
+            ))}
+            <div className="profiles-triangle__canvas">
+              <svg className="profiles-triangle__mesh" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                <path d="M50 6 L93 88 L7 88 Z" />
+              </svg>
+              {PROFILE_ID_ORDER.map((profileId, index) => (
+                <TriangleNode
+                  key={profileId}
+                  profile={profileDictionary[profileId]}
+                  order={index + 1}
+                  position={PROFILE_POSITION_CLASS[profileId]}
+                  isActive={selectedProfileId === profileId}
+                  coordinates={PROFILE_COORDINATES[profileId]}
+                  onSelect={(id) => {
+                    setSelectedProfileId(id);
+                    setHoveredProfileId(null);
+                  }}
+                  onFocusProfile={setHoveredProfileId}
+                />
+              ))}
+              {hoveredProfileId && (
+                <TriangleTooltip
+                  profile={profileDictionary[hoveredProfileId]}
+                  position={PROFILE_POSITION_CLASS[hoveredProfileId]}
+                  coordinates={PROFILE_COORDINATES[hoveredProfileId]}
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      </Section>
+
+      <ScrollSection
+        id="profiles-scroll"
+        title="Perfiles + mapa sincronizado"
+        lead="Desplázate por la explicación mientras el mapa permanece fijo a la derecha."
+        steps={steps}
+        renderGraphic={renderGraphic}
+        background="muted"
+        eyebrow="Zoom analítico"
+        onStepChange={handleStepChange}
+      />
+    </>
   );
 };

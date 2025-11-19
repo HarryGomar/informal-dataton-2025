@@ -7,47 +7,42 @@ import { commerceLayerConfigs } from "../maps/mapLayerConfig";
 
 const steps: ScrollStepConfig[] = [
   {
-    id: "intro",
-    title: "¿Dónde se concentra la informalidad comercial?",
+    id: "context",
+    title: "¿Dónde se ancla la derrama informal?",
     body:
-      "El comercio informal generó 265,864 mdp en 2023 (0.83% del PIB). Antes de explorar el mapa, destacamos el peso agregado de estas actividades.",
+      "Son 265,864 mdp (0.83% del PIB) en comercios fuera del circuito formal. La barra superior mantiene los montos a la vista mientras revisas el territorio.",
   },
   {
-    id: "split",
-    title: "Mayoreo vs menudeo",
+    id: "wholesale",
+    title: "Mayoreo: 7.2% con focos puntuales",
     body:
-      "El comercio al menudeo explica 93% del valor agregado informal. El mayoreo opera con estructuras más formales, mientras que el retail es atomizado y propenso a la informalidad.",
+      "El mayoreo apenas suma 19,076 mdp informales. Se concentra en corredores logísticos con controles medianos; el norte se mantiene estable salvo nodos aislados.",
   },
   {
-    id: "wholesale-map",
-    title: "Mapa: informalidad en mayoreo",
+    id: "retail",
+    title: "Menudeo domina la fuga",
     body:
-      "La tasa nacional en mayoreo ronda el 33.5%. Observa cómo el centro-norte mantiene niveles moderados, pero aún existen focos por arriba de 40%.",
+      "Tienditas y micronegocios apalancan 246,788 mdp (92.8%). La informalidad promedio supera 65% y rompe 80% en el sur-sureste.",
   },
   {
-    id: "retail-map",
-    title: "Mapa: informalidad en menudeo",
+    id: "territory",
+    title: "Lectura estatal",
     body:
-      "En menudeo la informalidad se dispara a 67.2% promedio y supera 80% en el sur. El mapa cambia a una gama de verdes más intensa para destacar el riesgo.",
-  },
-  {
-    id: "select-state",
-    title: "Comparar estados",
-    body:
-      "Pasa el cursor por cada estado para ver sus tasas de informalidad y valor agregado en cada segmento. Contrasta Nuevo León frente a Oaxaca o Tabasco para dimensionar la brecha.",
+      "Explora cada estado para cruzar tasas y valor agregado. Nuevo León vs Oaxaca evidencia la brecha logística, de crédito y de inspección.",
   },
   {
     id: "insight",
-    title: "Insight: complejidad vs informalidad",
+    title: "Qué cuidar",
     body:
-      "Mientras más compleja la logística y capital del subsector, menor la informalidad. El retail, con micronegocios dispersos, seguirá siendo el campo crítico para una política pública focalizada.",
+      "A más complejidad logística y financiamiento formal, menos informalidad. El reto es el retail atomizado: requiere trazabilidad digital y operativos móviles.",
   },
 ];
 
 const mapModeByStep: Record<string, "wholesale" | "retail"> = {
-  "wholesale-map": "wholesale",
-  "retail-map": "retail",
-  "select-state": "retail",
+  context: "retail",
+  wholesale: "wholesale",
+  retail: "retail",
+  territory: "retail",
   insight: "retail",
 };
 
@@ -57,14 +52,11 @@ export const GeographySection: React.FC = () => {
       id="geografia"
       eyebrow="Sección 3"
       title="Geografía de la informalidad: mayoreo vs menudeo"
-      lead="Usamos datos censales para mostrar cómo el retail concentra la mayor parte de la informalidad y dónde se localiza."
+      lead="Mantén visibles los montos de mayoreo y menudeo mientras el mapa fija los focos territoriales de la informalidad."
+      introContent={<WholesaleRetailValueBar />}
       steps={steps}
       background="light"
       renderGraphic={(activeStepId) => {
-        if (activeStepId === "intro" || activeStepId === "split") {
-          return <WholesaleRetailValueBar />;
-        }
-
         const mode = mapModeByStep[activeStepId] ?? "retail";
         return (
           <div className="map-panel">

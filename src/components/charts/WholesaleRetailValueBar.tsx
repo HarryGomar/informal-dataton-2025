@@ -1,41 +1,57 @@
 import React from "react";
 import { wholesaleRetailTotals } from "../../data/geography";
 
+const formatCurrency = (value: number) => `$${value.toLocaleString("es-MX")} mdp`;
+
 export const WholesaleRetailValueBar: React.FC = () => {
   const wholesaleShare = (wholesaleRetailTotals.wholesale / wholesaleRetailTotals.total) * 100;
   const retailShare = 100 - wholesaleShare;
 
+  const bars = [
+    {
+      id: "wholesale",
+      label: "Mayoreo",
+      share: wholesaleShare,
+      amount: wholesaleRetailTotals.wholesale,
+      detail: "Comercio al por mayor",
+    },
+    {
+      id: "retail",
+      label: "Menudeo",
+      share: retailShare,
+      amount: wholesaleRetailTotals.retail,
+      detail: "Comercio al por menor",
+    },
+  ];
+
   return (
-    <div className="wholesale-retail-bar">
-      <header>
-        <p className="eyebrow">Valor agregado informal 2023</p>
-        <h3>
-          ${wholesaleRetailTotals.total.toLocaleString("es-MX")} mdp · 0.83% del PIB
-        </h3>
+    <div className="geography-panel">
+      <header className="geography-panel__summary">
+        <p className="eyebrow">Derrama informal 2023</p>
+        <h3>{formatCurrency(wholesaleRetailTotals.total)} · 0.83% del PIB</h3>
         <p>
-          El menudeo concentra el 93% de la derrama: tiendas, micronegocios y puestos que operan
-          fuera del circuito formal.
+          El menudeo concentra el 93% de la derrama: tienditas, micronegocios y puestos fuera del
+          circuito formal.
         </p>
       </header>
 
-      <div className="wholesale-retail-bar__track" aria-label="Distribución mayoreo vs menudeo">
-        <div className="wholesale-retail-bar__segment" style={{ width: `${wholesaleShare}%` }}>
-          <span>Mayoreo · {wholesaleShare.toFixed(1)}%</span>
-        </div>
-        <div className="wholesale-retail-bar__segment wholesale-retail-bar__segment--retail" style={{ width: `${retailShare}%` }}>
-          <span>Menudeo · {retailShare.toFixed(1)}%</span>
-        </div>
-      </div>
-
-      <div className="wholesale-retail-bar__legend">
-        <div>
-          <strong>${wholesaleRetailTotals.wholesale.toLocaleString("es-MX")} mdp</strong>
-          <p>Comercio al por mayor</p>
-        </div>
-        <div>
-          <strong>${wholesaleRetailTotals.retail.toLocaleString("es-MX")} mdp</strong>
-          <p>Comercio al por menor</p>
-        </div>
+      <div className="geography-dual-bars" role="list" aria-label="Comparativo mayoreo vs menudeo">
+        {bars.map((bar) => (
+          <article className="geography-dual-bars__item" key={bar.id} role="listitem">
+            <div className="geography-dual-bars__meta">
+              <span>{bar.label}</span>
+              <strong>{bar.share.toFixed(1)}%</strong>
+            </div>
+            <div className="geography-dual-bars__track" aria-label={`${bar.label} ${bar.share.toFixed(1)}%`}>
+              <div
+                className={`geography-dual-bars__fill geography-dual-bars__fill--${bar.id}`}
+                style={{ width: `${bar.share}%` }}
+              />
+            </div>
+            <p className="geography-dual-bars__amount">{formatCurrency(bar.amount)}</p>
+            <p className="geography-dual-bars__detail">{bar.detail}</p>
+          </article>
+        ))}
       </div>
     </div>
   );

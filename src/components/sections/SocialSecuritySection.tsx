@@ -1,92 +1,146 @@
 import React from "react";
-import { ScrollSection } from "../layout/ScrollSection";
-import type { ScrollStepConfig } from "../../types/sections";
-import { SocialSecurityDonutChart } from "../charts/SocialSecurityDonutChart";
-import { socialSecurityImpact } from "../../data/costs";
 import { Section } from "../layout/Section";
 import { SectionHeader } from "../layout/SectionHeader";
+import { socialSecurityImpact } from "../../data/costs";
 import { IconHealth, IconHousing, IconPension } from "../icons/DeckIcons";
 
-const steps: ScrollStepConfig[] = [
-  {
-    id: "overview",
-    title: "Impacto en la seguridad social",
-    body:
-      "La informalidad priva a millones de trabajadores de servicios médicos, vivienda y ahorro para el retiro. El boquete financiero supera los 18 mil mdp al año.",
-  },
+const formatMillions = (value: number) =>
+  value.toLocaleString("es-MX", {
+    minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
+    maximumFractionDigits: Number.isInteger(value) ? 0 : 2,
+  });
+
+const institutions = [
   {
     id: "imss",
-    title: "Cuotas IMSS patronales y obreras",
-    body: `≈ ${(
-      socialSecurityImpact.imssPatronal + socialSecurityImpact.imssObrera
-    ).toLocaleString("es-MX")} mdp no ingresan al seguro social, lo que reduce la capacidad hospitalaria y la cobertura de riesgos.`,
-  },
-  {
-    id: "infonavit",
-    title: "INFONAVIT (vivienda)",
-    body:
-      "≈ 2,867 mdp que podrían financiar créditos de vivienda no se entregan porque los empleadores informales no aportan al fondo habitacional.",
+    label: "IMSS",
+    detail: "Cuotas patronales + obreras",
+    amount: socialSecurityImpact.imssPatronal + socialSecurityImpact.imssObrera,
+    icon: <IconHealth />,
   },
   {
     id: "pensions",
-    title: "Pensiones (SAR/AFORE)",
-    body:
-      "≈ 3,107 mdp dejan de invertirse en las cuentas individuales de retiro, condenando a los trabajadores informales a una vejez sin respaldo.",
+    label: "Pensiones",
+    detail: "Nuevo esquema individual",
+    amount: socialSecurityImpact.pensions,
+    icon: <IconPension />,
+  },
+  {
+    id: "infonavit",
+    label: "INFONAVIT",
+    detail: "Aportaciones a vivienda",
+    amount: socialSecurityImpact.infonavit,
+    icon: <IconHousing />,
   },
 ];
 
-const highlightMap: Record<string, "imss" | "infonavit" | "pensions" | null> = {
-  overview: null,
-  imss: "imss",
-  infonavit: "infonavit",
-  pensions: "pensions",
-};
-
-const socialTiles = [
-  { id: "imss", label: "IMSS", amount: socialSecurityImpact.imssPatronal + socialSecurityImpact.imssObrera, icon: <IconHealth /> },
-  { id: "pensions", label: "Pensiones", amount: socialSecurityImpact.pensions, icon: <IconPension /> },
-  { id: "infonavit", label: "INFONAVIT", amount: socialSecurityImpact.infonavit, icon: <IconHousing /> },
+const calculationRows: Array<
+  | { id: string; label: string; amount: number }
+  | { id: string; label: "Cálculo"; note: string }
+> = [
+  { id: "imssPatronal", label: "Cuotas IMSS patronales", amount: socialSecurityImpact.imssPatronal },
+  { id: "imssWorker", label: "Cuotas IMSS trabajador", amount: socialSecurityImpact.imssObrera },
+  { id: "infonavit", label: "Aportaciones INFONAVIT", amount: socialSecurityImpact.infonavit },
+  {
+    id: "method-1",
+    label: "Cálculo",
+    note:
+      "Las tres cifras anteriores surgen de la calculadora oficial tomando el salario mínimo por trabajador y multiplicándolo por el número de remunerados en cada subsector.",
+  },
+  {
+    id: "pensions",
+    label: "Aportaciones a pensiones (nuevo esquema)",
+    amount: socialSecurityImpact.pensions,
+  },
+  {
+    id: "method-2",
+    label: "Cálculo",
+    note:
+      "La cifra de pensiones emplea los salarios promedios observados, el número de remunerados y la tasa promedio de contribución registrada en 2023.",
+  },
 ];
 
-export const SocialSecuritySection: React.FC = () => (
-  <>
-    <ScrollSection
-      id="social-security"
-      eyebrow="Paso 2.3"
-      title="La crisis silenciosa en seguridad social"
-      lead="Sin cuotas formales, el IMSS, INFONAVIT y las cuentas de pensiones pierden recursos esenciales. Resaltar cada tramo ayuda a dimensionar qué institución queda desfinanciada."
-      steps={steps}
-      background="light"
-      renderGraphic={(activeStepId) => (
-        <div className="scroll-graphic-stack">
-          <SocialSecurityDonutChart highlight={highlightMap[activeStepId]} />
-          <p className="scroll-graphic-caption">
-            En total, el sistema pierde 18,845 mdp cada año por aportaciones que nunca llegan.
-          </p>
-        </div>
-      )}
-    />
+const totalImpact =
+  socialSecurityImpact.imssPatronal +
+  socialSecurityImpact.imssObrera +
+  socialSecurityImpact.infonavit +
+  socialSecurityImpact.pensions;
 
-    <Section tone="plain" layout="center">
+export const SocialSecuritySection: React.FC = () => (
+  <Section id="social-security" tone="plain" layout="full" className="social-security">
+    <div className="social-security__hero">
       <SectionHeader
         alignment="center"
-        eyebrow="Saldo pendiente"
-        title="$18,845 mdp adeudados en seguridad social"
-        kicker="Tres instituciones descapitalizadas cuando los comercios operan fuera del IMSS."
+        eyebrow="Paso 2.3"
+        title="Saldo pendiente de la seguridad social"
+        kicker="Una sola escena limpia para dimensionar el boquete."
+        intro={
+          <p>
+            La informalidad priva a los sistemas de salud, vivienda y retiro de recursos frescos en el
+            preciso momento en el que más los necesitan. Esta lectura concentra la historia en un solo
+            plano para mantener foco y claridad.
+          </p>
+        }
       />
 
-      <div className="icon-stat-grid">
-        {socialTiles.map((tile) => (
-          <article className="icon-stat" key={tile.id}>
-            <div className="icon-stat__icon" aria-hidden>
-              {tile.icon}
-            </div>
-            <p>{tile.label}</p>
-            <strong>${tile.amount.toLocaleString("es-MX")} mdp</strong>
-          </article>
-        ))}
+      <div className="social-security__headline">
+        <p className="social-security__eyebrow">Saldo pendiente anual</p>
+        <strong>${formatMillions(Math.round(totalImpact))} mdp</strong>
+        <p>
+          Recursos que deberían financiar servicios médicos, vivienda social y retiro digno, pero se
+          pierden cuando los comercios operan fuera del IMSS.
+        </p>
       </div>
-      <p className="icon-stat__caption">Fuente: estimaciones con datos del INEGI, IMSS e INFONAVIT, 2023.</p>
-    </Section>
-  </>
+    </div>
+
+    <div className="social-security__metrics" aria-label="Desglose por institución">
+      {institutions.map((institution) => (
+        <article className="social-security__metric" key={institution.id}>
+          <div className="social-security__metric-label">
+            <span className="social-security__metric-icon" aria-hidden>
+              {institution.icon}
+            </span>
+            <div>
+              <p>{institution.label}</p>
+              <small>{institution.detail}</small>
+            </div>
+          </div>
+          <strong>${formatMillions(institution.amount)} mdp</strong>
+        </article>
+      ))}
+      <p className="social-security__source">Fuente: estimaciones con datos del INEGI, IMSS e INFONAVIT, 2023.</p>
+    </div>
+
+    <div className="social-security__calcs">
+      <div className="social-security__calcs-header">
+        <h3>Explicación de los cálculos</h3>
+        <p>
+          La informalidad también significa millones de mexicanos sin protección social —y sin
+          contribuciones al sistema público que sostendrá las pensiones del futuro.
+        </p>
+      </div>
+
+      <ul className="social-security__calc-list">
+        {calculationRows.map((row) => (
+          <li key={row.id} className={"amount" in row ? "calc-row" : "calc-row calc-row--note"}>
+            {"amount" in row ? (
+              <>
+                <span>{row.label}</span>
+                <strong>${formatMillions(row.amount)} mdp</strong>
+              </>
+            ) : (
+              <>
+                <span>{row.label}</span>
+                <p>{row.note}</p>
+              </>
+            )}
+          </li>
+        ))}
+      </ul>
+
+      <p className="social-security__closing">
+        Se pierde bienestar, se pierde envejecimiento digno, se pierde movilidad social.
+      </p>
+    </div>
+  </Section>
 );

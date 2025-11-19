@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Scrollama, Step } from "react-scrollama";
 import type { ScrollStepConfig } from "../../types/sections";
 import { StickyGraphic } from "./StickyGraphic";
@@ -12,6 +12,8 @@ interface ScrollSectionProps {
   renderGraphic?: (activeStepId: string) => React.ReactNode;
   background?: "default" | "muted" | "light";
   eyebrow?: string;
+  introContent?: React.ReactNode;
+  onStepChange?: (stepId: string) => void;
 }
 
 export const ScrollSection: React.FC<ScrollSectionProps> = ({
@@ -22,11 +24,30 @@ export const ScrollSection: React.FC<ScrollSectionProps> = ({
   renderGraphic,
   background = "default",
   eyebrow,
+  introContent,
+  onStepChange,
 }) => {
   const [activeStepId, setActiveStepId] = useState(() => steps[0]?.id ?? "");
+  const [scrollOffset, setScrollOffset] = useState(0.5);
+
+  useEffect(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    const mediaQuery = window.matchMedia("(max-width: 900px)");
+    const handleChange = () => setScrollOffset(mediaQuery.matches ? 0.8 : 0.5);
+    handleChange();
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
 
   const tone = background === "muted" ? "muted" : "plain";
   const layout = renderGraphic ? "split-left" : "full";
+
+  const handleStepEnter = ({ data }: { data: string }) => {
+    setActiveStepId(data);
+    onStepChange?.(data);
+  };
 
   return (
     <Section id={id} tone={tone} layout={layout} className="section--scrolly">
@@ -37,7 +58,9 @@ export const ScrollSection: React.FC<ScrollSectionProps> = ({
           {lead && <p className="section-lead">{lead}</p>}
         </header>
 
-        <Scrollama offset={0.5} onStepEnter={({ data }) => setActiveStepId(data)}>
+        {introContent && <div className="scroll-section__intro">{introContent}</div>}
+
+        <Scrollama offset={scrollOffset} onStepEnter={handleStepEnter}>
           {steps.map((step) => (
             <Step data={step.id} key={step.id}>
               <article

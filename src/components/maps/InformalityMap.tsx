@@ -44,7 +44,8 @@ export const InformalityMap: React.FC<InformalityMapProps> = ({ layer, controlsS
       container: containerRef.current,
       style: getStadiaStyleUrl(),
       center: [-102.5528, 23.6345],
-      zoom: 4,
+      zoom: determineInitialZoom(),
+      minZoom: 2.8,
     });
 
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), "top-right");
@@ -103,26 +104,30 @@ export const InformalityMap: React.FC<InformalityMapProps> = ({ layer, controlsS
 
   return (
     <div className="map-wrapper">
-      <div ref={containerRef} className="map-container map-container--choropleth" />
+      <div className="map-surface">
+        <div ref={containerRef} className="map-container map-container--choropleth" />
 
-      <div className="map-overlay">
-        <div className="map-info-card">
-          {layer.eyebrow && <p className="map-info-card__eyebrow">{layer.eyebrow}</p>}
-          <h3 className="map-info-card__title">{layer.label}</h3>
-          {layer.description && <p className="map-info-card__description">{layer.description}</p>}
-          <div className="map-legend">
-            <span>{layer.legend.minLabel}</span>
-            <div className="map-legend-gradient" style={{ backgroundImage: legendGradient }} />
-            <span>{layer.legend.maxLabel}</span>
-          </div>
-          {(loading || error) && (
-            <div className="map-status-pill">
-              {loading ? "Cargando datos…" : error?.message ?? "Error"}
+        <div className="map-overlay" aria-live="polite">
+          <div className="map-overlay__stack">
+            <div className="map-info-card">
+              {layer.eyebrow && <p className="map-info-card__eyebrow">{layer.eyebrow}</p>}
+              <h3 className="map-info-card__title">{layer.label}</h3>
+              {layer.description && <p className="map-info-card__description">{layer.description}</p>}
+              <div className="map-legend">
+                <span>{layer.legend.minLabel}</span>
+                <div className="map-legend-gradient" style={{ backgroundImage: legendGradient }} />
+                <span>{layer.legend.maxLabel}</span>
+              </div>
+              {(loading || error) && (
+                <div className="map-status-pill">
+                  {loading ? "Cargando datos…" : error?.message ?? "Error"}
+                </div>
+              )}
             </div>
-          )}
-        </div>
 
-        {controlsSlot && <div className="map-controls-card">{controlsSlot}</div>}
+            {controlsSlot && <div className="map-controls-card">{controlsSlot}</div>}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -158,6 +163,20 @@ export const InformalityMap: React.FC<InformalityMapProps> = ({ layer, controlsS
     eventsBoundRef.current = true;
   }
 };
+
+function determineInitialZoom() {
+  if (typeof window === "undefined") {
+    return 4;
+  }
+  const width = window.innerWidth;
+  if (width <= 480) {
+    return 3.1;
+  }
+  if (width <= 768) {
+    return 3.35;
+  }
+  return 4;
+}
 
 function buildLegendGradient(layer: MapLayerConfig) {
   const [min, max] = layer.domain;

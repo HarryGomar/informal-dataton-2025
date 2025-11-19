@@ -98,6 +98,9 @@ const ShapImportanceChart: React.FC<{ filterCategory?: string }> = ({ filterCate
 
   // Sort by importance
   const sortedVariables = [...filteredVariables].sort((a, b) => b.importance - a.importance);
+  const formatShapLabel = (label: string) => (label.length > 26 ? `${label.slice(0, 24)}…` : label);
+  const yTickFontSize = sortedVariables.length > 10 ? 11 : 13;
+  const chartMinHeight = Math.max(360, sortedVariables.length * 34);
 
   const data = {
     labels: sortedVariables.map(v => v.label),
@@ -109,7 +112,7 @@ const ShapImportanceChart: React.FC<{ filterCategory?: string }> = ({ filterCate
         borderColor: '#5F8D65',
         borderWidth: 1,
         borderRadius: 4,
-        maxBarThickness: 40,
+        maxBarThickness: 32,
       },
     ],
   };
@@ -143,9 +146,10 @@ const ShapImportanceChart: React.FC<{ filterCategory?: string }> = ({ filterCate
         },
         ticks: {
           font: {
-            size: 12,
+            size: 11,
           },
           color: '#64748b',
+          maxTicksLimit: 4,
         },
         border: {
           display: false,
@@ -157,13 +161,14 @@ const ShapImportanceChart: React.FC<{ filterCategory?: string }> = ({ filterCate
         },
         ticks: {
           font: {
-            size: 13,
-            weight: 'bold' as const,
+            size: yTickFontSize,
+            weight: 600,
           },
           color: '#334155',
           autoSkip: false,
           mirror: false,
           padding: 10,
+          callback: (value: string | number) => formatShapLabel(String(value)),
         },
         border: {
           display: false,
@@ -173,7 +178,7 @@ const ShapImportanceChart: React.FC<{ filterCategory?: string }> = ({ filterCate
     layout: {
       padding: {
         left: 0,
-        right: 20,
+        right: 12,
         top: 20,
         bottom: 20
       }
@@ -186,7 +191,7 @@ const ShapImportanceChart: React.FC<{ filterCategory?: string }> = ({ filterCate
         Importancia de Variables (SHAP)
         {filterCategory && <span className="text-sm font-normal text-slate-500 ml-2">({filterCategory})</span>}
       </h3>
-      <div className="flex-grow w-full" style={{ minHeight: '500px' }}>
+      <div className="flex-grow w-full" style={{ minHeight: `${chartMinHeight}px` }}>
         <Bar data={data} options={options} />
       </div>
     </div>

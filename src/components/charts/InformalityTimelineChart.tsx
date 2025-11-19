@@ -1,7 +1,7 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { Line } from "react-chartjs-2";
-import type { ChartData, ChartDataset, ChartOptions, Plugin } from "chart.js";
-import { informalityTimeline, policyBands } from "../../data/policies";
+import type { Chart as ChartJS, ChartData, ChartDataset, ChartOptions, Plugin } from "chart.js";
+import { informalityTimeline, policyBands, timelineDomain, totalVariation } from "../../data/policies";
 import type { PolicyBand } from "../../data/policies";
 import { palette } from "../../theme/palette";
 
@@ -13,6 +13,8 @@ interface InformalityTimelineChartProps {
   activePolicyId?: PolicyBandId | null;
   showBands?: boolean;
   variant?: TimelineVariant;
+  headline?: string;
+  annotation?: string | null;
 }
 
 const datasetColor = palette.brand;
@@ -21,25 +23,51 @@ export const InformalityTimelineChart: React.FC<InformalityTimelineChartProps> =
   activePolicyId = null,
   showBands = true,
   variant = "card",
+  headline = "A pesar de 25 años de reformas, la línea se mantiene casi plana",
+  annotation = null,
 }) => {
-  const activePolicy = policyBands.find((band) => band.id === activePolicyId) ?? null;
+  type TimelinePoint = { x: number; y: number };
 
-  const basePoints = useMemo(() => {
-    return informalityTimeline.map((point) => ({ x: point.year, y: point.rate }));
+  const chartInstanceRef = useRef<ChartJS<"line", TimelinePoint[]> | null>(null);
+  const setChartRef = useCallback((chart: ChartJS<"line", TimelinePoint[]> | null | undefined) => {
+    if (!chart) {
+      chartInstanceRef.current?.destroy();
+      chartInstanceRef.current = null;
+      return;
+    }
+
+    if (chartInstanceRef.current && chartInstanceRef.current !== chart) {
+      chartInstanceRef.current.destroy();
+    }
+
+    chartInstanceRef.current = chart;
   }, []);
 
-  const highlightPoints = useMemo(() => {
+  useEffect(() => {
+    return () => {
+      chartInstanceRef.current?.destroy();
+      chartInstanceRef.current = null;
+    };
+  }, []);
+
+  const activePolicy = policyBands.find((band) => band.id === activePolicyId) ?? null;
+
+  const basePoints: TimelinePoint[] = useMemo(() => {
+    return informalityTimeline.map((point) => ({ x: point.position, y: point.rate }));
+  }, []);
+
+  const highlightPoints: TimelinePoint[] = useMemo(() => {
     if (!activePolicy) {
       return [];
     }
 
     return informalityTimeline
-      .filter((point) => point.year >= activePolicy.highlightStartYear && point.year <= activePolicy.highlightEndYear)
-      .map((point) => ({ x: point.year, y: point.rate }));
+      .filter((point) => point.position >= activePolicy.highlightStart && point.position <= activePolicy.highlightEnd)
+      .map((point) => ({ x: point.position, y: point.rate }));
   }, [activePolicy]);
 
-  const chartData: ChartData<"line"> = useMemo(() => {
-    const datasets: ChartDataset<"line", { x: number; y: number }[]>[] = [
+  const chartData: ChartData<"line", TimelinePoint[]> = useMemo(() => {
+    const datasets: ChartDataset<"line", TimelinePoint[]>[] = [
       {
         label: "Tasa de informalidad laboral (%)",
         data: basePoints,
@@ -80,33 +108,23 @@ export const InformalityTimelineChart: React.FC<InformalityTimelineChartProps> =
         }
 
         const { ctx, scales } = chart;
-        const { top, bottom, left, right } = chart.chartArea;
+        const { top, bottom } = chart.chartArea;
         const xScale = scales.x;
         if (!xScale) {
           return;
         }
 
         policyBands.forEach((band) => {
-          const start = xScale.getPixelForValue(band.startYear);
-          const end = xScale.getPixelForValue(band.endYear);
+          const start = xScale.getPixelForValue(band.startPosition);
+          const end = xScale.getPixelForValue(band.endPosition);
           if (!Number.isFinite(start) || !Number.isFinite(end)) {
             return;
           }
 
           const width = end - start;
           ctx.save();
-          ctx.fillStyle = band.id === activePolicyId ? "rgba(77, 114, 72, 0.18)" : "rgba(77, 114, 72, 0.08)";
+          ctx.fillStyle = band.id === activePolicyId ? "rgba(77, 114, 72, 0.18)" : "rgba(77, 114, 72, 0.05)";
           ctx.fillRect(start, top, width, bottom - top);
-
-          if (band.id === activePolicyId) {
-            ctx.fillStyle = palette.brandDark;
-            ctx.font = "600 12px 'Inter', sans-serif";
-            ctx.textBaseline = "top";
-            const label = `${band.title} (${band.startYear}-${band.endYear})`;
-            const textX = Math.min(Math.max(start + 8, left + 8), right - 140);
-            ctx.fillText(label, textX, top + 8);
-          }
-
           ctx.restore();
         });
       },
@@ -157,23 +175,25 @@ export const InformalityTimelineChart: React.FC<InformalityTimelineChartProps> =
       scales: {
         x: {
           type: "linear",
-          min: 1998,
-          max: 2024,
+          min: timelineDomain.min,
+          max: timelineDomain.max,
           ticks: {
-            callback: (value) => `${value}`,
-            stepSize: 4,
+            callback: (value) => `${Math.round(Number(value))}`,
+            stepSize: 2,
+            color: "#6b726f",
           },
           grid: {
-            color: "rgba(31, 44, 35, 0.08)",
+            color: "rgba(31, 44, 35, 0.06)",
           },
         },
         y: {
-          beginAtZero: false,
-          suggestedMin: 52,
-          suggestedMax: 60,
+          beginAtZero: true,
+          min: 0,
+          max: 70,
           ticks: {
             callback: (value) => `${value}%`,
-            stepSize: 1,
+            stepSize: 10,
+            color: "#6b726f",
           },
           grid: {
             color: "rgba(31, 44, 35, 0.08)",
@@ -195,30 +215,20 @@ export const InformalityTimelineChart: React.FC<InformalityTimelineChartProps> =
 
   const plugins = [bandPlugin, markerPlugin].filter(Boolean) as Plugin<"line">[];
 
-  const calloutClass = activePolicy ? `policy-callout policy-callout--${activePolicy.placement}` : "policy-callout policy-callout--muted";
-
   return (
     <div className={`informality-timeline informality-timeline--${variant}`}>
       <div className="informality-timeline__frame">
+        <header className="informality-timeline__meta">
+          <div>
+            <p className="informality-timeline__eyebrow">Variación total 2000–2025</p>
+            <strong>{totalVariation.toFixed(2)} puntos porcentuales</strong>
+          </div>
+          <p className="informality-timeline__headline">{headline}</p>
+        </header>
         <div className="informality-timeline__chart">
-          <Line data={chartData} options={options} plugins={plugins} />
+          <Line ref={setChartRef} data={chartData} options={options} plugins={plugins} datasetIdKey="label" />
         </div>
-        {activePolicy ? (
-          <div className={calloutClass}>
-            <p className="policy-callout__eyebrow">{activePolicy.title}</p>
-            <h4>
-              {activePolicy.startYear} – {activePolicy.endYear}
-            </h4>
-            <p className="policy-callout__summary">{activePolicy.summary}</p>
-            <p className="policy-callout__result">{activePolicy.result}</p>
-          </div>
-        ) : (
-          <div className={calloutClass}>
-            <p className="policy-callout__summary">
-              Desplázate para activar cada política y ver cómo apenas altera la línea de informalidad.
-            </p>
-          </div>
-        )}
+        {annotation && <p className="informality-timeline__annotation">{annotation}</p>}
       </div>
     </div>
   );

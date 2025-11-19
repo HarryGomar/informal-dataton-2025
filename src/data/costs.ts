@@ -5,9 +5,9 @@ export const fiscalImpact = {
 };
 
 export const socialSecurityImpact = {
-  imssPatronal: 11509,
-  imssObrera: 1362,
-  infonavit: 2867,
+  imssPatronal: 11509.47,
+  imssObrera: 1361.63,
+  infonavit: 2866.57,
   pensions: 3107,
 };
 
