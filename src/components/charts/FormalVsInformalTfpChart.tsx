@@ -18,6 +18,7 @@ export const FormalVsInformalTfpChart: React.FC = () => {
   const maxValue = Math.max(...bars.map((bar) => bar.value));
   const delta = tfpImpact.delta;
   const formattedDelta = `${delta < 0 ? "–" : delta > 0 ? "+" : ""}${Math.abs(delta)}%`;
+
   return (
     <div className="tfp-impact-card">
       <div className="tfp-impact-card__callout">

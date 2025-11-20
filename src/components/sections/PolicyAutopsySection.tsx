@@ -247,7 +247,7 @@ export const PolicyAutopsySection: React.FC = () => {
 
         {!isMobileStack && (
           <div className="policy-autopsy__steps" aria-hidden="true">
-            <Scrollama offset={0.6} onStepEnter={({ data }) => setActiveStepId(data)}>
+            <Scrollama offset={0.6} onStepEnter={({ data }) => setActiveStepId(String(data))}>
               {triggerOrder.map((id) => (
                 <Step data={id} key={id}>
                   <div className="policy-autopsy__trigger">

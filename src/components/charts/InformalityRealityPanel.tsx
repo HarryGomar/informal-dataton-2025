@@ -7,6 +7,8 @@ interface PhaseConfig {
   id: "assumption" | "reality";
   headline: string;
   subcopy: string;
+  methodNote: string;
+  keyEquation: string;
   segments: { label: string; value: number; color: string; detail: string }[];
 }
 
@@ -14,7 +16,9 @@ const panelPhases: PhaseConfig[] = [
   {
     id: "assumption",
     headline: "Supuesto de políticas: casi todos evaden por elección",
-    subcopy: "Los programas fiscales partieron de la premisa de que la informalidad era, sobre todo, una decisión voluntaria.",
+    subcopy: "Durante años, los estímulos fiscales y las campañas de formalización trataron a la informalidad como un asunto de voluntad.",
+  methodNote: "Diagnóstico implícito en programas como Régimen de Incorporación Fiscal (RIF).",
+  keyEquation: "P(Informal)=P(Evasión voluntaria) ≥ 0.95",
     segments: [
       { label: "Evasores voluntarios", value: 95, color: palette.accentCoral, detail: "Diagnóstico implícito" },
       { label: "Excluidos involuntarios", value: 5, color: "rgba(33, 56, 45, 0.15)", detail: "Casi invisibles" },
@@ -23,7 +27,10 @@ const panelPhases: PhaseConfig[] = [
   {
     id: "reality",
     headline: "Realidad empírica: 4 de cada 5 están excluidos",
-    subcopy: "Duval-Hernández demuestra que la mayoría preferiría un empleo formal, pero no lo consigue por barreras estructurales.",
+    subcopy: "Duval-Hernández (2021) utiliza un modelo probit bivariado para demostrar que la mayoría querría un empleo formal, pero no lo consigue por barreras de acceso.",
+    methodNote:
+      "Modelo probit bivariado: una ecuación capta la decisión de buscar empleo formal y otra la probabilidad de obtenerlo; la correlación de errores (ρ) es significativa y confirma procesos conjuntos.",
+    keyEquation: "P(Y_2=Informal|PreferenciaFormal)=0.80",
     segments: [
       { label: "Informales involuntarios", value: 80, color: palette.brand, detail: "Quieren ser formales" },
       { label: "Informales voluntarios", value: 20, color: palette.accentWarm, detail: "El 20% que elige" },
@@ -73,13 +80,10 @@ export const InformalityRealityPanel: React.FC = () => {
           <p className="eyebrow">Transición 80 / 20</p>
           <h3>{phase.headline}</h3>
           <p>{phase.subcopy}</p>
-          <div className="reality-panel__timeline" role="presentation">
-            {panelPhases.map((item, index) => (
-              <div key={item.id} className={`reality-panel__timeline-step${index <= phaseIndex ? " is-active" : ""}`}>
-                <span>{index + 1}</span>
-                <p>{index === 0 ? "Supuesto" : "Evidencia"}</p>
-              </div>
-            ))}
+          <div className="reality-panel__method">
+            <p className="reality-panel__method-label">Método</p>
+            <p>{phase.methodNote}</p>
+            <p className="reality-panel__equation">{phase.keyEquation}</p>
           </div>
           <small className="reality-panel__source">Fuente: Duval-Hernández et al. (2023).</small>
         </div>

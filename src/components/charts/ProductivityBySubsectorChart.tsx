@@ -72,7 +72,7 @@ const baseOptions: ChartOptions<"bar"> = {
 };
 
 export const ProductivityBySubsectorChart: React.FC<ProductivityBySubsectorChartProps> = ({ view }) => {
-  const labels = productivityData.map((item) => item.subsector);
+  const labels = productivityData.map((item) => `${item.code} · ${item.subsector}`);
   const data: ChartData<"bar"> = {
     labels,
     datasets: [

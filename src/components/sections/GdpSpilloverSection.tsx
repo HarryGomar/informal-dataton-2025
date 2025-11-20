@@ -2,53 +2,48 @@ import React from "react";
 import { ScrollSection } from "../layout/ScrollSection";
 import type { ScrollStepConfig } from "../../types/sections";
 
-const spilloverCards = [
+const spilloverInsights = [
   {
     id: "context",
-    label: "Circuitos paralelos",
-    value: "Sin apalancamiento",
-    detail:
-      "La derrama no accede a crédito ni inventarios formales, por lo que el dinero no escala ni vuelve a invertirse.",
+    title: "Flujo atrapado en efectivo",
+    description:
+      "Opera sin crédito ni proveedores formales, por lo que el dinero rota entre micronegocios sin multiplicarse.",
   },
   {
-    id: "calc",
-    label: "Estimación anual",
-    value: "$838,294 mdp",
-    detail:
-      "Suma de valor agregado informal (mayoreo + menudeo) y gastos operativos que hoy circulan fuera del radar fiscal.",
+  id: "calc",
+    title: "Componentes del monto",
+    description: "Valor agregado informal de mayoreo y menudeo más los gastos operativos que sostienen inventarios y nóminas.",
   },
   {
-    id: "opportunity",
-    label: "PIB liberable",
-    value: "+2.6%",
-    detail:
-      "Integrar gradualmente este flujo equivale a agregar 2.6 puntos del PIB con empleo formal y cadenas productivas robustas.",
+  id: "opportunity",
+    title: "Palanca de crecimiento",
+    description: "Integrarlo a cadenas y financiamiento formal lo convierte en inversión, empleo estable y mayor recaudación.",
   },
 ];
 
 const steps: ScrollStepConfig[] = [
   {
     id: "context",
-    title: "Impacto inmediato en el crecimiento",
+    title: "Por qué no suma al PIB",
     body:
-      "El comercio informal opera fuera del crédito y de las cadenas productivas. La derrama resultante queda encapsulada en micronegocios que no escalan ni se reinvierten en el territorio.",
+      "La derrama de comercio informal queda fuera de crédito, proveedores formales y datos fiscales, así que el flujo no escala ni se reinvierte en la economía local.",
   },
   {
     id: "calc",
-    title: "Cómo estimamos los $838,294 mdp",
+    title: "Componentes del cálculo",
     body: (
       <ul className="spillover-list">
-        <li>Valor agregado informal de mayoreo y menudeo medido en cuentas satélite.</li>
-        <li>Gastos operativos que sostienen inventarios y nóminas en efectivo.</li>
-        <li>Flujo que se mantendría en la economía formal si estos negocios se integraran.</li>
+        <li>Valor agregado informal de mayoreo y menudeo según las cuentas satélite.</li>
+        <li>Gastos operativos que mantienen inventarios, nóminas y logística en efectivo.</li>
+        <li>Escenario en el que ese flujo entra a cadenas formales y multiplica su impacto.</li>
       </ul>
     ),
   },
   {
     id: "opportunity",
-    title: "≈ 2.6% del PIB desbloqueable",
+    title: "Qué pasa si lo integramos",
     body:
-      "Formalizar gradualmente este segmento libera 2.6 puntos del PIB. Permite más inversión, empleo con seguridad social y un mercado interno más profundo que multiplica la derrama en barrios y ciudades.",
+      "Formalizar gradualmente este segmento libera ≈ $838,294 mdp (2.6% del PIB) para crédito productivo, empleo con seguridad social y encadenamientos regionales.",
   },
 ];
 
@@ -60,19 +55,19 @@ const SpilloverIntro: React.FC = () => (
         <span className="spillover-intro__value">+2.6%</span>
         <span className="spillover-intro__label">del PIB nacional</span>
       </div>
-      <p>≈ $838,294 mdp que hoy no se integran a los circuitos formales ni se registran como crecimiento.</p>
+      <p>≈ $838,294 mdp anuales de comercio informal que hoy no entran al crédito ni a los circuitos fiscales, por lo que no se registran como crecimiento.</p>
     </div>
 
     <div className="spillover-intro__metrics">
       <article className="spillover-intro__metric-card">
-        <p className="spillover-intro__metric-label">Monto anual fuera del radar</p>
-        <strong>$838 mil mdp</strong>
+        <p className="spillover-intro__metric-label">Monto anual</p>
+        <strong>$838,294 mdp</strong>
         <span>Valor agregado informal de mayoreo y menudeo más sus costos operativos.</span>
       </article>
       <article className="spillover-intro__metric-card">
-        <p className="spillover-intro__metric-label">Potencial de formalización</p>
-        <strong>2.6 pts PIB</strong>
-        <span>Equivale al crecimiento adicional que se lograría al integrar esta derrama.</span>
+        <p className="spillover-intro__metric-label">Equivalente macro</p>
+        <strong>2.6% del PIB</strong>
+        <span>Proporción que podría recuperarse si estos negocios se integran gradualmente.</span>
       </article>
     </div>
   </div>
@@ -86,29 +81,21 @@ const SpilloverHighlightPanel: React.FC<SpilloverHighlightPanelProps> = ({ activ
   <div className="spillover-panel">
     <div className="spillover-panel__hero">
       <p className="spillover-panel__eyebrow">Potencial recuperable</p>
-      <div className="spillover-panel__stat-group">
-        <div className="spillover-panel__stat">
-          <span className="spillover-panel__stat-label">PIB adicional</span>
-          <strong className="spillover-panel__value">+2.6%</strong>
-          <small>Impacto nacional si se integra la derrama.</small>
-        </div>
-        <div className="spillover-panel__stat">
-          <span className="spillover-panel__stat-label">Equivalente anual</span>
-          <strong className="spillover-panel__value">$838,294 mdp</strong>
-          <small>Recursos que hoy no circulan formalmente.</small>
-        </div>
+      <div className="spillover-panel__stat">
+        <span className="spillover-panel__stat-label">PIB adicional estimado</span>
+        <strong className="spillover-panel__value">+2.6% (≈ $838,294 mdp)</strong>
+        <small>Flujo que hoy se queda fuera de bancos, proveedores formales y recaudación.</small>
       </div>
     </div>
 
     <div className="spillover-panel__grid">
-      {spilloverCards.map((card) => (
+      {spilloverInsights.map((insight) => (
         <article
-          key={card.id}
-          className={`spillover-panel__card${activeStepId === card.id ? " spillover-panel__card--active" : ""}`}
+          key={insight.id}
+          className={`spillover-panel__card${activeStepId === insight.id ? " spillover-panel__card--active" : ""}`}
         >
-          <p className="spillover-panel__card-label">{card.label}</p>
-          <strong>{card.value}</strong>
-          <p>{card.detail}</p>
+          <p className="spillover-panel__card-label">{insight.title}</p>
+          <p>{insight.description}</p>
         </article>
       ))}
     </div>

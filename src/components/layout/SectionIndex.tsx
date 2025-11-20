@@ -3,12 +3,14 @@ import type { SectionPhase } from "../../data/sectionsIndex";
 
 interface SectionIndexProps {
   phases: SectionPhase[];
-  defaultPhaseId?: string;
 }
 
-export const SectionIndex: React.FC<SectionIndexProps> = ({ phases, defaultPhaseId }) => {
-  const [activePhaseId, setActivePhaseId] = useState<string>(defaultPhaseId ?? phases[0]?.id ?? "");
+export const SectionIndex: React.FC<SectionIndexProps> = ({ phases }) => {
+  if (!phases || phases.length === 0) {
+    return null;
+  }
 
+  const [activePhaseId, setActivePhaseId] = useState<string>(phases[0]?.id ?? "");
   const activePhase = useMemo(() => phases.find((phase) => phase.id === activePhaseId) ?? phases[0], [activePhaseId, phases]);
 
   if (!activePhase) {
@@ -16,7 +18,7 @@ export const SectionIndex: React.FC<SectionIndexProps> = ({ phases, defaultPhase
   }
 
   return (
-    <div className="section-index" aria-label="Índice de la narrativa">
+    <nav className="section-index section-index--compact" aria-label="Índice de la narrativa">
       <div className="section-index__tabs" role="tablist">
         {phases.map((phase) => {
           const isActive = phase.id === activePhase.id;
@@ -36,29 +38,23 @@ export const SectionIndex: React.FC<SectionIndexProps> = ({ phases, defaultPhase
         })}
       </div>
 
-      <div className="section-index__body" role="tabpanel">
+      <div className="section-index__panel" role="tabpanel">
         <div className="section-index__phase-meta">
-          <p className="section-index__phase-kicker">{activePhase.kicker}</p>
-          <h3>{activePhase.title}</h3>
-          <p>{activePhase.description}</p>
+          <span className="section-index__phase-kicker">{activePhase.kicker}</span>
+          <p className="section-index__phase-title">{activePhase.title}</p>
         </div>
 
-        <div className="section-index__grid">
+        <ul className="section-index__links">
           {activePhase.sections.map((section) => (
-            <a
-              key={section.id}
-              className="section-index__card"
-              href={`#${section.anchor}`}
-              aria-label={`${section.title}. Ir a la sección.`}
-            >
-              <div className="section-index__card-eyebrow">{section.eyebrow}</div>
-              <h4>{section.title}</h4>
-              <p>{section.summary}</p>
-              <span className="section-index__card-link">Ver sección</span>
-            </a>
+            <li key={section.id}>
+              <a className="section-index__link" href={`#${section.anchor}`}>
+                <span className="section-index__link-eyebrow">{section.eyebrow}</span>
+                <span className="section-index__link-title">{section.title}</span>
+              </a>
+            </li>
           ))}
-        </div>
+        </ul>
       </div>
-    </div>
+    </nav>
   );
 };

@@ -333,7 +333,10 @@ const ShapImportanceChart: React.FC<{ filterCategory?: string; embedded?: boolea
           color: "#1e1f1a",
           autoSkip: false,
           padding: 8,
-          callback: (value: string | number) => formatShapLabel(String(value)),
+          callback(this: any, value: string | number) {
+            const label = this?.getLabelForValue ? this.getLabelForValue(value) : value;
+            return formatShapLabel(String(label));
+          },
         },
         border: { display: false },
       },

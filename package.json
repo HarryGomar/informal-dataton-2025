@@ -11,10 +11,12 @@
   },
   "dependencies": {
     "chart.js": "^4.5.1",
+    "katex": "^0.16.11",
     "maplibre-gl": "^5.13.0",
     "react": "^19.2.0",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^19.2.0",
+  "react-katex": "^3.1.0",
     "react-scrollama": "^2.4.2"
   },
   "devDependencies": {
@@ -22,6 +24,7 @@
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
+  "@types/react-katex": "^3.0.4",
     "@vitejs/plugin-react": "^5.1.0",
     "eslint": "^9.39.1",
     "eslint-plugin-react-hooks": "^7.0.1",

@@ -124,9 +124,9 @@ export const InformalityMap: React.FC<InformalityMapProps> = ({ layer, controlsS
                 </div>
               )}
             </div>
-
-            {controlsSlot && <div className="map-controls-card">{controlsSlot}</div>}
           </div>
+
+          {controlsSlot && <div className="map-controls-card">{controlsSlot}</div>}
         </div>
       </div>
     </div>

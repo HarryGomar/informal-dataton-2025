@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "maplibre-gl/dist/maplibre-gl.css";
+import "katex/dist/katex.min.css";
 import "./components/charts/chartConfig";
 import "./styles/globals.css";
 import "./styles/layout.css";
