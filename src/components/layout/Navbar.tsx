@@ -32,7 +32,7 @@ export const Navbar: React.FC = () => {
     <header className={`navbar${menuOpen ? " navbar--open" : ""}`}>
       <div className="navbar__inner">
         <a href="#intro" className="navbar__brand" onClick={closeMenu}>
-          Informalidad Comercio
+          Datatón 2025 INEGI ANTAD
         </a>
 
         <nav id="site-nav" aria-label="Navegación principal" className={menuOpen ? "is-open" : ""}>

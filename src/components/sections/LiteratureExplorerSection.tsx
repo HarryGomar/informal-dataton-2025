@@ -485,7 +485,7 @@ export const LiteratureExplorerSection: React.FC = () => {
   }, []);
 
   return (
-    <Section id="marco-teorico" layout="full">
+    <Section id="marco-teorico" layout="full" className="literature-section">
       <SectionHeader
         eyebrow="Sección 5"
         title="Literatura estructural de la informalidad"
@@ -505,8 +505,9 @@ export const LiteratureExplorerSection: React.FC = () => {
         }
       />
 
-      <div className="literature-constellation">
-        <section className="determinant-lattice" aria-label="Resumen de determinantes">
+      <div className="literature-section__content">
+        <div className="literature-constellation">
+          <section className="determinant-lattice" aria-label="Resumen de determinantes">
           {lanesWithCount.map((lane) => (
             <article key={lane.id} className="determinant-lattice__item">
               <header>
@@ -526,9 +527,9 @@ export const LiteratureExplorerSection: React.FC = () => {
               </div>
             </article>
           ))}
-        </section>
+          </section>
 
-        <section className="literature-matrix" aria-label="Relación papers-determinantes">
+          <section className="literature-matrix" aria-label="Relación papers-determinantes">
           <div className="literature-matrix__legend">
             <p className="eyebrow">Cruce evidencia vs determinantes</p>
             <p>Los puntos sólidos indican una relación directa del artículo con el eje estructural.</p>
@@ -560,7 +561,10 @@ export const LiteratureExplorerSection: React.FC = () => {
                     {determinantOrder.map((determinant) => {
                       const isLinked = paper.determinants.includes(determinant);
                       return (
-                        <td key={`${paper.id}-${determinant}`}>
+                        <td
+                          key={`${paper.id}-${determinant}`}
+                          data-label={determinantLabels[determinant]}
+                        >
                           <span
                             className={
                               "matrix-dot" +
@@ -581,10 +585,11 @@ export const LiteratureExplorerSection: React.FC = () => {
               </tbody>
             </table>
           </div>
-        </section>
-      </div>
+          </section>
+        </div>
 
-      <PaperDetailPanel paper={activePaper} activeTab={activeTab} onTabChange={setActiveTab} />
+        <PaperDetailPanel paper={activePaper} activeTab={activeTab} onTabChange={setActiveTab} />
+      </div>
     </Section>
   );
 };

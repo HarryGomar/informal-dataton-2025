@@ -24,7 +24,7 @@ export const HeroSection: React.FC = () => {
           <div className="hero__content">
             <span className="horizontal-rule" aria-hidden />
             <p className="hero__eyebrow">El contexto inevitable</p>
-            <h1>Informalidad en el comercio: el problema que México no ha logrado resolver</h1>
+            <h1>Informalidad en el comercio mexicano - Datatón 2025 INEGI ANTAD</h1>
             <p className="hero__lead">
               Frena el crecimiento, limita el bienestar y erosiona las instituciones. Tras dos décadas de reformas
               fiscales, las tasas permanecen estáticas. Si conocemos el diagnóstico, ¿por qué falla la cura?
